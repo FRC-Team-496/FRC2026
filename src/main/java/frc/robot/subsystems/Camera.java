@@ -3,6 +3,10 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.controller.*;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -27,6 +31,8 @@ public class Camera extends SubsystemBase {
         NetworkTableEntry pipeline = armTable.getEntry("pipeline");
         int aprilTagID =  (int) armTable.getEntry("tid").getDouble(-1);
         detected_ID = aprilTagID;
+
+        AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
         
         SmartDashboard.putNumber("tag ID", aprilTagID);
         //read values periodically
@@ -100,6 +106,15 @@ public class Camera extends SubsystemBase {
 
     public static double getDistZ(){
         return NetworkTableInstance.getDefault().getTable("limelight-algae").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[2];
+    }
+
+    public void findHub(){
+        
+        //find bots postition on field
+
+        //find the hub
+        //align within shooting range
+
     }
 
     

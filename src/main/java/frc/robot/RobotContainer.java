@@ -6,7 +6,7 @@ package frc.robot;
 //fully importing com file odes not resolve object initialization errors; find com file and confirm it exists
 
 //import edu.kauailabs.navx.frc.AHRS;
-import com.studica.frc.*;
+//import //com.studica.frc.*;
 
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.math.MathUtil;
@@ -688,8 +688,11 @@ public class RobotContainer {
     
     Command dropArm = new dropArm(m_arm, 2);
 
-    moveArm.schedule();
-    forward.schedule();
+    CommandScheduler.getInstance().schedule(moveArm);
+    CommandScheduler.getInstance().schedule(forward);
+
+    //moveArm.schedule();
+    //forward.schedule();
       
     
   
@@ -700,7 +703,8 @@ public class RobotContainer {
     }
 
     if(System.currentTimeMillis() - startTime > 4000){
-      dropArm.schedule();
+      //dropArm.schedule();
+      CommandScheduler.getInstance().schedule(dropArm);
     }
 
     // if(System.currentTimeMillis() - startTime > 5000){
