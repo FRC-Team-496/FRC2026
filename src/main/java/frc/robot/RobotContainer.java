@@ -27,7 +27,6 @@ import frc.robot.subsystems.Components.Arm;
 import frc.robot.subsystems.Components.AlageIntake;
 import frc.robot.subsystems.Components.Climber;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 
@@ -55,16 +54,7 @@ public class RobotContainer {
   private int autoScheduler = 0;
 
 
-//   private final Pixy2 m_pixy = new Pixy2();
   Thread m_visionThread;
-
-  // The driver's controller
-  //XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
-
-  //Axis[0] - left(-)/right(+)
-  //Axis[1] - forward(-)/back(+)
-  //Axis[2] - rotation (right is +)
-  //Axis[3] altitude? up(-)/down(+)
   GenericHID m_driverController = new GenericHID(OIConstants.kDriverControllerPort);
   GenericHID m_driverController2 = new GenericHID(OIConstants.kDriverControllerPort2);
 
@@ -105,15 +95,7 @@ public class RobotContainer {
             , m_camera)
         );
 
-        //armStage
-    
-        // m_visionThread =
-        // new Thread(
-        //     () -> {
-        //         m_camera.visionSystem();
-        //     });
-        //     m_visionThread.setDaemon(true);
-        //     m_visionThread.start();
+        
         }
         
     
@@ -149,22 +131,8 @@ public class RobotContainer {
             m_robotDrive));
 
 
-    // SALUS, button 1 driver controller (Back trigger)
 
-    new JoystickButton(m_driverController, 3) //SALUS
-    .whileTrue(new RunCommand(() -> m_robotDrive.drive(0, m_salus.calcX(), m_salus.calcYaw() / 2, false, 0.3)));
-
-    // new JoystickButton(m_driverController, 3) //SALUS
-    // .whileTrue(new SequentialCommandGroup(
-    //   new lineUp(m_robotDrive),
-
-    //   new moveStraight(m_robotDrive, Camera.getDistZ(), 1)
-
-    // ));
-
-            new JoystickButton(m_driverController, 3) //SALUS
-    .whileTrue(new InstantCommand(
-           () -> m_salus.set()));
+    
 
 
    
@@ -721,6 +689,9 @@ public class RobotContainer {
 
     //     switch(intmode) {
     //         case(1):
+
+
+
     //         if(!case1.isScheduled()){
     //           case1.schedule();
     //         }
