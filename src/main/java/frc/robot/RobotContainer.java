@@ -21,6 +21,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.Camera;
 import frc.robot.subsystems.DriveSubsystem;
 
+// import frc.robot.subsystems.NavX;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 
@@ -39,6 +40,7 @@ public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   private final Camera m_camera = new Camera();
+  // private final NavX m_gyro = new NavX();
   private SendableChooser<Integer> m_chooser = new SendableChooser<Integer>(); 
   private int autoScheduler = 0;
 
@@ -73,7 +75,11 @@ public class RobotContainer {
       
 
         //m_climbers.setDefaultCommand(new RunCommand(() -> m_climbers.stop(), m_climbers));        
-        
+        // m_gyro.setDefaultCommand(
+        //     new RunCommand(
+        //     () -> m_gyro.putGyro()    
+        //     , m_gyro)
+        // );
         m_camera.setDefaultCommand(
             new RunCommand(
             () -> m_camera.startCamera()    

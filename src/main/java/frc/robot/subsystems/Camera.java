@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -10,6 +9,7 @@ import edu.wpi.first.math.controller.*;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj2.command.Command;
 
 public class Camera extends SubsystemBase {
     private static double statX;
@@ -54,25 +54,9 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("pitch Tag", tagToCamera[3]);
         SmartDashboard.putNumber("yaw Tag", tagToCamera[4]);
         SmartDashboard.putNumber("roll Tag", tagToCamera[5]);
-
-
-      
-        //System.out.println(getDetected_ID() == 7);
-        //post to smart dashboard periodically
-        // SmartDashboard.putNumber("LimelightX", x);
-        // SmartDashboard.putNumber("LimelightY", y);
-        // SmartDashboard.putNumber("LimelightArea", area);
-        // SmartDashboard.putNumber("LimelightBotX", bot[0]);
-        // SmartDashboard.putNumber("LimelightBotY", bot[1]);
-        // SmartDashboard.putNumber("LimelightBotZ", bot[2]);
-        // SmartDashboard.putNumber("zLimelightBotRoll", bot[3]);
-        // SmartDashboard.putNumber("LimelightBotPitch", bot[4]);
-        // SmartDashboard.putNumber("LimelightBotYaw", bot[5]);
         
         SmartDashboard.putNumber("Tag ID", aprilTagID);
 
-
-        
     }
 
 
@@ -93,9 +77,6 @@ public class Camera extends SubsystemBase {
         return statY;
     }
 
-
-
-
     public static double getDistX(){
         return NetworkTableInstance.getDefault().getTable("limelight-algae").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[0];
     }
@@ -108,13 +89,10 @@ public class Camera extends SubsystemBase {
         return NetworkTableInstance.getDefault().getTable("limelight-algae").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[2];
     }
 
-    public void findHub(){
-        
-        //find bots postition on field
 
-        //find the hub
-        //align within shooting range
-
+    public void alignTag(double tagID, double distance){
+        //Pose2d current_position = 
+        //use functions from limelight helpers as examples or just copy?
     }
 
     
