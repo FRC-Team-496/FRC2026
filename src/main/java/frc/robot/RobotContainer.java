@@ -109,11 +109,18 @@ public class RobotContainer {
 
 
 
-            new JoystickButton(m_driverController2, 7) 
-            .whileTrue(new InstantCommand(() -> new moveStraight(m_robotDrive, 1, 1))
+            new JoystickButton(m_driverController, 4) 
+            .whileTrue(new RunCommand(() -> m_robotDrive.drive(0, 1, 0, false, 1)));
+            //this doesnt work. i think it is being interrupted when it tries to run by default
+
+            new JoystickButton(m_driverController, 2)
+            .onTrue(new InstantCommand(() -> System.out.println("Command Run")));
 
 
-            );
+            new JoystickButton(m_driverController, 3)
+            .onTrue(new moveStraight(m_robotDrive , 3, 1));
+            //this works
+            
 
   }
 
@@ -140,6 +147,7 @@ public class moveStraight extends Command{
     @Override
     public void initialize() {
       startX = m_robotDrive.getPose().getX();
+      System.out.println("Command Init");
     }
 
     @Override
@@ -190,7 +198,7 @@ public class moveStraight extends Command{
   
 
   public void teleopInit(){
-        
+      System.out.println("Start");
   }
 
   public void autoInnit(){
