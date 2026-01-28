@@ -95,5 +95,4 @@ public class Camera extends SubsystemBase {
         //use functions from limelight helpers as examples or just copy?
     }
 
-    
 }

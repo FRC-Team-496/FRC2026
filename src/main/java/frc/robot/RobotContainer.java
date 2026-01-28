@@ -21,7 +21,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.Camera;
 import frc.robot.subsystems.DriveSubsystem;
 
-// import frc.robot.subsystems.NavX;
+import frc.robot.subsystems.NavX;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 
@@ -40,7 +40,7 @@ public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   private final Camera m_camera = new Camera();
-  // private final NavX m_gyro = new NavX();
+  private NavX m_gyro = new NavX();
   private SendableChooser<Integer> m_chooser = new SendableChooser<Integer>(); 
   private int autoScheduler = 0;
 
@@ -115,16 +115,16 @@ public class RobotContainer {
 
 
 
-            new JoystickButton(m_driverController, 4) 
-            .whileTrue(new RunCommand(() -> m_robotDrive.drive(0, 1, 0, false, 1)));
-            //this doesnt work. i think it is being interrupted when it tries to run by default
+            new JoystickButton(m_driverController, 1) 
+            .onTrue(new rotate(m_robotDrive, 1, 1));
+
 
             new JoystickButton(m_driverController, 2)
             .onTrue(new InstantCommand(() -> System.out.println("Command Run")));
 
 
             new JoystickButton(m_driverController, 3)
-            .onTrue(new moveStraight(m_robotDrive , 3, 1));
+            .onTrue(new moveStraight(m_robotDrive , 1, 1));
             //this works
             
 
@@ -148,27 +148,58 @@ public class moveStraight extends Command{
       this.m_robotDrive = m_robotDrive;
       this.distance = distance;
       this.direction = direction;
+      addRequirements(m_robotDrive);
     }
 
     @Override
     public void initialize() {
       startX = m_robotDrive.getPose().getX();
-      System.out.println("Command Init");
     }
 
     @Override
     public void execute() {
+      
       m_robotDrive.drive(.6 * direction, 0.0, 0.0, false, .3); //-.02
     }
 
     @Override
     public boolean isFinished() {
-        return Math.abs(m_robotDrive.getPose().getX() - startX) > (distance / 1.31);  
+        return Math.abs(m_robotDrive.getPose().getX() - startX) > (distance );  
     }
 
   }
 
+  public class rotate extends Command{
+    DriveSubsystem m_robotDrive;
+    private double degrees; 
+    private double startRot;
+    private int direction;
 
+    public rotate(DriveSubsystem m_robotDrive, double degrees, int direction){
+      this.m_robotDrive = m_robotDrive;
+      this.degrees = degrees;
+      this.direction = direction;
+      addRequirements(m_robotDrive);
+    }
+
+    @Override
+    public void initialize() {
+      startRot = m_gyro.yaw();
+    }
+
+    @Override
+    public void execute() {
+      System.out.println(m_robotDrive.getHeading());
+      m_robotDrive.drive(0, 0.0, 1 * direction, false, .3); //-.02
+    }
+
+    @Override
+    public boolean isFinished() {
+        return Math.abs(m_gyro.yaw() - startRot) > (degrees);  
+    }
+
+  }
+  
 
 
 
@@ -194,7 +225,7 @@ public class moveStraight extends Command{
 
 
   public void teloPeriodic(){
-       
+       m_gyro.putGyro();
   }
 
   int state = 0;
@@ -213,9 +244,12 @@ public class moveStraight extends Command{
     System.out.println(mode);
     intmode = (int) mode;
     startTime = System.currentTimeMillis();
+    CommandScheduler.getInstance().schedule(new moveStraight(m_robotDrive, 1.0, 1));
 
-    
-    
+
+
+   
+
   }
 
 
@@ -226,11 +260,7 @@ public class moveStraight extends Command{
       
     
 
-      switch(intmode) {
-         case(1):
-        break;
-           
-        }
+     
     
 }
 }
