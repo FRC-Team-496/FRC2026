@@ -15,6 +15,12 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
+import com.studica.frc.*;
+import frc.robot.subsystems.NavX;
+
+import java.util.ArrayList;
+
+import com.studica.frc.*;
 
 public class Camera extends SubsystemBase {
     private static double statX;
@@ -26,6 +32,11 @@ public class Camera extends SubsystemBase {
     private static int neuralNetworkpipelineId;
 
     private static double[] tagToCamera;
+
+    //need to figure out acutal measurements for these
+    private static double hubMinYaw=0;
+    private static double hubMaxYaw=0;
+    private final NavX m_gyro = new NavX();
 
     public void startCamera() {
         NetworkTable armTable = NetworkTableInstance.getDefault().getTable("limelight-shooter");
@@ -61,8 +72,8 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("roll Tag", tagToCamera[5]);
         
         SmartDashboard.putNumber("Tag ID", aprilTagID);
-
-        alignTag(1, 1, 2, 30);
+        ArrayList<Double> targetMarkers = chooseTargetPosition(1,1);
+        alignTag(1, targetMarkers.get(0), targetMarkers.get(1), targetMarkers.get(2));
 
     }
 
@@ -85,6 +96,8 @@ public class Camera extends SubsystemBase {
         return statY;
     }
 
+
+
     //gets distance value, camera is 0,0,0("How far do we need to move left/right to line up?")
     public static double getDistX(){
         return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[0];
@@ -98,7 +111,9 @@ public class Camera extends SubsystemBase {
         return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[2];
     }
     
-    //gets distance value, camera is 0,0,0("How far do we need to move left/right to line up?")
+
+
+    //gets distance value, tag is 0,0,0("How far do we need to move left/right to line up?")
     public static double getDistZFromTag(){
         return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("botpose_targetspace").getDoubleArray(new double[6])[2];
     }
@@ -111,53 +126,76 @@ public class Camera extends SubsystemBase {
         return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("botpose_targetspace").getDoubleArray(new double [6])[4];
     }
 
+
+    public static double getBestYaw(){
+        //create something that checks whether the gryo yaw is calibrated and if it matches the limelight yaw
+        //use both to get a more accurate value
+        //double gyroYaw = m_gyro.yaw();
+        double limelightYaw = getYawFromTag();
+        //double bestYaw = gyroYaw;
+        return limelightYaw;
+    }
+
+
+    //trig function that determines how far and at what angle to robot needs to go to get to a target position
     public void alignTag(double tagID, double xTarget, double zTarget, double yawTarget){
         double zPosition = getDistZFromTag();
         double xPosition = getDistXFromTag();
         double yawPosition = getYawFromTag();
 
-        double xPositionChange = xPosition + xTarget;
-        double zPositionChange = zPosition+zTarget;
-        double yawPositionChange = yawPosition + yawTarget;
+        //was all addition, change back if needed
+        double xPositionChange = xTarget-xPosition;
+        double zPositionChange = zPosition-zTarget;
+        double yawPositionChange = yawTarget - yawPosition;
 
         double totalDistanceToMove = Math.sqrt(Math.pow(zPositionChange,2) + Math.pow(xPositionChange, 2) );
         double totalYaw = Math.atan2(xPositionChange,-zPositionChange);
         totalYaw = totalYaw*(180/Math.PI);
         totalYaw = totalYaw - yawPosition; 
-        
-
-        SmartDashboard.putNumber("X Position: ",xPosition);
-        SmartDashboard.putNumber("Z position: " ,zPosition);
-        SmartDashboard.putNumber("Yaw: ",yawPosition);
-        SmartDashboard.putNumber("X Position change: ",xPositionChange);
-        SmartDashboard.putNumber("Z position change: " ,zPositionChange);
-        SmartDashboard.putNumber("Yaw position change: " ,yawPositionChange);
-        SmartDashboard.putNumber("Direction to drive in: ", totalDistanceToMove);
-        SmartDashboard.putNumber("angle to drive at: ",totalYaw);
-
-
-
-
-
-
-
-        //Pose3d current_position = LimelightHelpers.getBotPose3d_wpiBlue("limelight-shooter");
-        //if (tagID == detected_ID){
-            //if (xDegrees != 500 && xDistance != 500){
-                //while (xDistance != NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[0]){
-                    //double distanceToMove = NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[0] - xDistance;
-                    //if (distanceToMove>0){
-                          //;
-                   //}
-                    
-                //}
-            //}
-            //while (NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[2]!= distance){
-                
-
-        //}
-        
+        //double gyroYaw = m_gyro.yaw();
+        //gyroYaw = totalYaw - gyroYaw;
+        //should check differences between gyro and limelight yaw - which is closer to expected value
+        //numbers are based off of a hub angle of 35 and current yaw of 40
+        SmartDashboard.putNumber("X Position: ",xPosition); //should be .5
+        SmartDashboard.putNumber("Z position: " ,zPosition);//should be 1.5
+        SmartDashboard.putNumber("Camera Yaw: ",yawPosition);//should be 40
+        SmartDashboard.putNumber("X Position change: ",xPositionChange);//should be .3
+        SmartDashboard.putNumber("Z position change: " ,zPositionChange);//should be .93
+        SmartDashboard.putNumber("Camera Yaw position change: " ,yawPositionChange);//should be -15
+        //SmartDashboard.putNumber("Gyro Yaw position change: ");//should be -15 too
+        SmartDashboard.putNumber("Distance to move: ", totalDistanceToMove);//should be .98
+        SmartDashboard.putNumber("angle to drive at: ",totalYaw);//should be 35?
     }
 
-    
+
+
+
+        
+    public ArrayList<Double> chooseTargetPosition(double tagID, double distanceFromTag){
+        double yawPosition = getBestYaw();
+        double yawNew;
+        //angle until centered with tag
+        if (yawPosition < hubMinYaw){
+            double yawChange = hubMinYaw - yawPosition;
+            yawNew = hubMinYaw;
+        }
+        else if(yawPosition > hubMaxYaw){
+            double yawChange = hubMaxYaw - yawPosition;
+            yawNew = hubMaxYaw;
+        }
+        else{
+            yawNew = yawPosition;
+        }
+
+        //find x and z target values
+        double zTarget = distanceFromTag * Math.sin(yawNew*(180/Math.PI));
+        double xTarget = distanceFromTag * Math.cos(yawNew*(180/Math.PI));
+        ArrayList<Double> returnStatement = new ArrayList<Double>();
+        returnStatement.add(xTarget);
+        returnStatement.add(zTarget);
+        returnStatement.add(yawNew);
+        return returnStatement;
+    }
+
+
 }
