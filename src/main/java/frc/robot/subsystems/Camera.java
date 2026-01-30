@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import com.studica.frc.*;
 import frc.robot.subsystems.NavX;
+import frc.robot.subsystems.DriveSubsystem;
 
 import java.util.ArrayList;
 
@@ -34,8 +35,8 @@ public class Camera extends SubsystemBase {
     private static double[] tagToCamera;
 
     //need to figure out acutal measurements for these
-    private static double hubMinYaw=0;
-    private static double hubMaxYaw=0;
+    private static double hubMinYaw=45;
+    private static double hubMaxYaw=45;
     private final NavX m_gyro = new NavX();
 
     public void startCamera() {
@@ -72,7 +73,7 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("roll Tag", tagToCamera[5]);
         
         SmartDashboard.putNumber("Tag ID", aprilTagID);
-        ArrayList<Double> targetMarkers = chooseTargetPosition(1,1);
+        ArrayList<Double> targetMarkers = chooseTargetPosition(1,.5);
         alignTag(1, targetMarkers.get(0), targetMarkers.get(1), targetMarkers.get(2));
 
     }
@@ -126,6 +127,10 @@ public class Camera extends SubsystemBase {
         return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("botpose_targetspace").getDoubleArray(new double [6])[4];
     }
 
+    public static double getTargetArea(){
+        return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("ta").getDouble(0);
+    }
+
 
     public static double getBestYaw(){
         //create something that checks whether the gryo yaw is calibrated and if it matches the limelight yaw
@@ -165,6 +170,8 @@ public class Camera extends SubsystemBase {
         //SmartDashboard.putNumber("Gyro Yaw position change: ");//should be -15 too
         SmartDashboard.putNumber("Distance to move: ", totalDistanceToMove);//should be .98
         SmartDashboard.putNumber("angle to drive at: ",totalYaw);//should be 35?
+
+
     }
 
 
@@ -197,5 +204,40 @@ public class Camera extends SubsystemBase {
         return returnStatement;
     }
 
+    public double getBestYaw(double currentYaw){
+        double taCurrent = getTargetArea();
+        double taTest=0;
+        if (currentYaw>0){
+            while (true){
+                //rotate left
+                taTest = getTargetArea();
+                if(taTest>taCurrent){
+                    taCurrent = taTest;
+                }
+                else{
+                    //rotate back
+                    break;
+                }
+            }
+        }
+        else if (currentYaw<0){
+            while (true){
+                //rotate right
+                taTest = getTargetArea();
+                if(taTest>taCurrent){
+                    taCurrent = taTest;
+                }
+                else{
+                    //rotate back
+                    break;
+                }
+            }
+        }
+        return taCurrent;
+    }
+
 
 }
+
+///Did not commit on Wednesday 
+/// DO NOT DELETE ANYTHING WITHOUT FIGURING OUT
