@@ -35,7 +35,7 @@ public class Camera extends SubsystemBase {
     private static double[] tagToCamera;
 
     //need to figure out acutal measurements for these
-    private static double hubMinYaw=45;
+    private static double hubMinYaw=-45;
     private static double hubMaxYaw=45;
     private final NavX m_gyro = new NavX();
     public Camera(DriveSubsystem driveSubsystem){
@@ -79,7 +79,7 @@ public class Camera extends SubsystemBase {
         ArrayList<Double> targetMarkers = chooseTargetPosition(1,.5);
         alignTag(1, targetMarkers.get(0), targetMarkers.get(1), targetMarkers.get(2));
 
-        getBestTargetArea(getBestYaw());
+        //getBestTargetArea(getBestYaw());
 
     }
 
@@ -87,6 +87,10 @@ public class Camera extends SubsystemBase {
     public static int getDetected_ID(){
         //System.out.println(detected_ID);
         return detected_ID;
+    }
+
+    public DriveSubsystem getDriveSubsystem(){
+        return driveSubsystem;
     }
 
     //gets degree value from crosshairs("How many degrees do we need to turn to line up?")
@@ -102,8 +106,6 @@ public class Camera extends SubsystemBase {
         return statY;
     }
 
-
-
     //gets distance value, camera is 0,0,0("How far do we need to move left/right to line up?")
     public static double getDistX(){
         return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[0];
@@ -117,8 +119,6 @@ public class Camera extends SubsystemBase {
         return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[2];
     }
     
-
-
     //gets distance value, tag is 0,0,0("How far do we need to move left/right to line up?")
     public static double getDistZFromTag(){
         return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("botpose_targetspace").getDoubleArray(new double[6])[2];
@@ -146,9 +146,13 @@ public class Camera extends SubsystemBase {
         return limelightYaw;
     }
 
+    public static double getResultantDistance(double x, double y){
+        return Math.sqrt(Math.pow(x, 2)+Math.pow(y,2));
+    }
+
 
     //trig function that determines how far and at what angle to robot needs to go to get to a target position
-    public void alignTag(double tagID, double xTarget, double zTarget, double yawTarget){
+    public ArrayList<Double> alignTag(double tagID, double xTarget, double zTarget, double yawTarget){
         double zPosition = getDistZFromTag();
         double xPosition = getDistXFromTag();
         double yawPosition = getYawFromTag();
@@ -158,7 +162,7 @@ public class Camera extends SubsystemBase {
         double zPositionChange = zPosition-zTarget;
         double yawPositionChange = yawTarget - yawPosition;
 
-        double totalDistanceToMove = Math.sqrt(Math.pow(zPositionChange,2) + Math.pow(xPositionChange, 2) );
+        double totalDistanceToMove = getResultantDistance(xPositionChange, zPositionChange);
         double totalYaw = Math.atan2(xPositionChange,-zPositionChange);
         totalYaw = totalYaw*(180/Math.PI);
         totalYaw = totalYaw - yawPosition; 
@@ -166,33 +170,35 @@ public class Camera extends SubsystemBase {
         //gyroYaw = totalYaw - gyroYaw;
         //should check differences between gyro and limelight yaw - which is closer to expected value
         //numbers are based off of a hub angle of 35 and current yaw of 40
-        /*SmartDashboard.putNumber("X Position: ",xPosition); //should be .5
+        SmartDashboard.putNumber("X Position: ",xPosition); //should be .5
         SmartDashboard.putNumber("Z position: " ,zPosition);//should be 1.5
         SmartDashboard.putNumber("Camera Yaw: ",yawPosition);//should be 40
         SmartDashboard.putNumber("X Position change: ",xPositionChange);//should be .3
         SmartDashboard.putNumber("Z position change: " ,zPositionChange);//should be .93
         SmartDashboard.putNumber("Camera Yaw position change: " ,yawPositionChange);//should be -15
+        SmartDashboard.putNumber("Total Yaw",totalYaw);
         //SmartDashboard.putNumber("Gyro Yaw position change: ");//should be -15 too
         SmartDashboard.putNumber("Distance to move: ", totalDistanceToMove);//should be .98
-        SmartDashboard.putNumber("angle to drive at: ",totalYaw);//should be 35?*/
+        SmartDashboard.putNumber("angle to drive at: ",totalYaw);//should be 35?
+        ArrayList<Double> move = new ArrayList<Double>();
+        move.add(xPositionChange);
+        move.add(zPosition);
+        move.add(totalYaw);
+        return move;
 
 
     }
-
-
-
-
         
     public ArrayList<Double> chooseTargetPosition(double tagID, double distanceFromTag){
         double yawPosition = getBestYaw();
         double yawNew;
         //angle until centered with tag
         if (yawPosition < hubMinYaw){
-            double yawChange = hubMinYaw - yawPosition;
+            double yawChange = yawPosition-hubMinYaw;
             yawNew = hubMinYaw;
         }
         else if(yawPosition > hubMaxYaw){
-            double yawChange = hubMaxYaw - yawPosition;
+            double yawChange = yawPosition - hubMaxYaw;
             yawNew = hubMaxYaw;
         }
         else{

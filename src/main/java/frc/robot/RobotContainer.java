@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.Camera;
 import frc.robot.subsystems.DriveSubsystem;
-
+import frc.robot.subsystems.LimelightAlignment;
 import frc.robot.subsystems.NavX;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
@@ -119,11 +119,11 @@ public class RobotContainer {
             .onTrue(new rotate(m_robotDrive, 1, 1));
 
 
-            new JoystickButton(m_driverController, 2)
-            .onTrue(new InstantCommand(() -> System.out.println("Command Run")));
-
             //new JoystickButton(m_driverController, 2)
-            //.onTrue(camera.getBestTargetArea(camera.getBestYaw()));
+            //.onTrue(new InstantCommand(() -> System.out.println("Command Run")));
+
+            new JoystickButton(m_driverController, 2)
+            .onTrue(new LimelightAlignment(m_camera));
 
 
             new JoystickButton(m_driverController, 3)
