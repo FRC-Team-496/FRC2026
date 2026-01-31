@@ -39,7 +39,7 @@ public class RobotContainer {
     
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-  private final Camera m_camera = new Camera();
+  private final Camera m_camera = new Camera(m_robotDrive);
   private NavX m_gyro = new NavX();
   private SendableChooser<Integer> m_chooser = new SendableChooser<Integer>(); 
   private int autoScheduler = 0;
@@ -112,7 +112,7 @@ public class RobotContainer {
         .whileTrue(new RunCommand(
             () -> m_robotDrive.setX(),
             m_robotDrive));
-
+          //Camera camera = new Camera();
 
 
             new JoystickButton(m_driverController, 1) 
@@ -122,10 +122,14 @@ public class RobotContainer {
             new JoystickButton(m_driverController, 2)
             .onTrue(new InstantCommand(() -> System.out.println("Command Run")));
 
+            //new JoystickButton(m_driverController, 2)
+            //.onTrue(camera.getBestTargetArea(camera.getBestYaw()));
+
 
             new JoystickButton(m_driverController, 3)
             .onTrue(new moveStraight(m_robotDrive , 1, 1));
             //this works
+            
             
 
   }
@@ -181,6 +185,7 @@ public class moveStraight extends Command{
       this.direction = direction;
       addRequirements(m_robotDrive);
     }
+
 
     @Override
     public void initialize() {

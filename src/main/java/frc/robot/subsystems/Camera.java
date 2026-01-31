@@ -1,33 +1,33 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;
-import frc.robot.LimelightHelpers.RawFiducial;
-import frc.robot.RobotContainer.moveStraight;
+//import frc.robot.LimelightHelpers;
+//import frc.robot.LimelightHelpers.RawFiducial;
+//import frc.robot.RobotContainer.moveStraight;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.controller.*;
+//import edu.wpi.first.math.geometry.Pose2d;
+//import edu.wpi.first.math.geometry.Pose3d;
+//import edu.wpi.first.math.controller.*;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.RobotContainer;
-import com.studica.frc.*;
-import frc.robot.subsystems.NavX;
-import frc.robot.subsystems.DriveSubsystem;
+//import edu.wpi.first.wpilibj2.command.Command;
+//import frc.robot.RobotContainer;
+//import frc.robot.RobotContainer.rotate;
+//import com.studica.frc.*;
+//import frc.robot.subsystems.NavX;
+//import frc.robot.subsystems.DriveSubsystem;
 
 import java.util.ArrayList;
-
-import com.studica.frc.*;
 
 public class Camera extends SubsystemBase {
     private static double statX;
     private static double statYaw;
     private static double statY;
     private static int detected_ID;
+    private DriveSubsystem driveSubsystem;
 
     private static int cameraPipelineID = 0;
     private static int neuralNetworkpipelineId;
@@ -38,7 +38,10 @@ public class Camera extends SubsystemBase {
     private static double hubMinYaw=45;
     private static double hubMaxYaw=45;
     private final NavX m_gyro = new NavX();
-
+    public Camera(DriveSubsystem driveSubsystem){
+        this.driveSubsystem = driveSubsystem;
+    }
+    
     public void startCamera() {
         NetworkTable armTable = NetworkTableInstance.getDefault().getTable("limelight-shooter");
         NetworkTableEntry tx = armTable.getEntry("tx");
@@ -75,6 +78,8 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("Tag ID", aprilTagID);
         ArrayList<Double> targetMarkers = chooseTargetPosition(1,.5);
         alignTag(1, targetMarkers.get(0), targetMarkers.get(1), targetMarkers.get(2));
+
+        getBestTargetArea(getBestYaw());
 
     }
 
@@ -161,7 +166,7 @@ public class Camera extends SubsystemBase {
         //gyroYaw = totalYaw - gyroYaw;
         //should check differences between gyro and limelight yaw - which is closer to expected value
         //numbers are based off of a hub angle of 35 and current yaw of 40
-        SmartDashboard.putNumber("X Position: ",xPosition); //should be .5
+        /*SmartDashboard.putNumber("X Position: ",xPosition); //should be .5
         SmartDashboard.putNumber("Z position: " ,zPosition);//should be 1.5
         SmartDashboard.putNumber("Camera Yaw: ",yawPosition);//should be 40
         SmartDashboard.putNumber("X Position change: ",xPositionChange);//should be .3
@@ -169,7 +174,7 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("Camera Yaw position change: " ,yawPositionChange);//should be -15
         //SmartDashboard.putNumber("Gyro Yaw position change: ");//should be -15 too
         SmartDashboard.putNumber("Distance to move: ", totalDistanceToMove);//should be .98
-        SmartDashboard.putNumber("angle to drive at: ",totalYaw);//should be 35?
+        SmartDashboard.putNumber("angle to drive at: ",totalYaw);//should be 35?*/
 
 
     }
@@ -204,40 +209,41 @@ public class Camera extends SubsystemBase {
         return returnStatement;
     }
 
-    public double getBestYaw(double currentYaw){
+    public void getBestTargetArea(double currentYaw){
+        SmartDashboard.putString("Target Area: ","running");
         double taCurrent = getTargetArea();
         double taTest=0;
         if (currentYaw>0){
             while (true){
-                //rotate left
+                SmartDashboard.putNumber("Current Area (clockwise): ",taTest);
+                driveSubsystem.drive(0, 0.0,-.1, false, .1);
                 taTest = getTargetArea();
                 if(taTest>taCurrent){
                     taCurrent = taTest;
                 }
                 else{
-                    //rotate back
+                    driveSubsystem.drive(0, 0.0,.1, false, .1);
+                    SmartDashboard.putString("done","turning clockwise");
                     break;
                 }
             }
         }
         else if (currentYaw<0){
             while (true){
-                //rotate right
+                SmartDashboard.putNumber("Current Area (counterclockwise): ",taTest);
+                driveSubsystem.drive(0, 0.0,.1, false, .1);
                 taTest = getTargetArea();
                 if(taTest>taCurrent){
                     taCurrent = taTest;
                 }
                 else{
-                    //rotate back
+                    driveSubsystem.drive(0, 0.0,-.1, false, .1);
+                    SmartDashboard.putString("done","turning counterclockwise");
                     break;
                 }
             }
         }
-        return taCurrent;
     }
 
 
 }
-
-///Did not commit on Wednesday 
-/// DO NOT DELETE ANYTHING WITHOUT FIGURING OUT
