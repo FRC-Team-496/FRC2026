@@ -251,5 +251,18 @@ public class Camera extends SubsystemBase {
         }
     }
 
+    public ArrayList<Double> getAreaDistance(double distance, double yaw){
+        ArrayList<Double> returnStatement = new ArrayList<Double>();
+        double x = distance * Math.cos(yaw);
+        double z = distance *Math.sin(yaw);
+        double currentX = getDistXFromTag();
+        double currentZ = getDistZFromTag()*-1;
+        x = currentX-x;
+        z= currentZ-z;
+        returnStatement.add(x);
+        returnStatement.add(z);
+        return returnStatement;
+    }
+
 
 }
