@@ -17,7 +17,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 //import frc.robot.RobotContainer;
 //import frc.robot.RobotContainer.rotate;
 //import com.studica.frc.*;
-//import frc.robot.subsystems.NavX;
+import frc.robot.subsystems.NavX;
 //import frc.robot.subsystems.DriveSubsystem;
 
 import java.util.ArrayList;
@@ -32,12 +32,10 @@ public class Camera extends SubsystemBase {
     private static int cameraPipelineID = 0;
     private static int neuralNetworkpipelineId;
 
-    private static double[] tagToCamera;
-
     //need to figure out acutal measurements for these
     private static double hubMinYaw=-45;
     private static double hubMaxYaw=45;
-    private final NavX m_gyro = new NavX();
+    private static NavX m_gyro = new NavX();
     public Camera(DriveSubsystem driveSubsystem){
         this.driveSubsystem = driveSubsystem;
     }
@@ -76,8 +74,7 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("roll Tag", tagToCamera[5]);
         
         SmartDashboard.putNumber("Tag ID", aprilTagID);
-        ArrayList<Double> targetMarkers = chooseTargetPosition(1,.5);
-        alignTag(1, targetMarkers.get(0), targetMarkers.get(1), targetMarkers.get(2));
+        ArrayList<Double> targetMarkers = alignTag(1,.5);
 
         //getBestTargetArea(getBestYaw());
 
@@ -140,10 +137,10 @@ public class Camera extends SubsystemBase {
     public static double getBestYaw(){
         //create something that checks whether the gryo yaw is calibrated and if it matches the limelight yaw
         //use both to get a more accurate value
-        //double gyroYaw = m_gyro.yaw();
+        double gyroYaw = m_gyro.yaw();
         double limelightYaw = getYawFromTag();
-        //double bestYaw = gyroYaw;
-        return limelightYaw;
+        double bestYaw = gyroYaw;
+        return bestYaw;
     }
 
     public static double getResultantDistance(double x, double y){
@@ -152,10 +149,33 @@ public class Camera extends SubsystemBase {
 
 
     //trig function that determines how far and at what angle to robot needs to go to get to a target position
-    public ArrayList<Double> alignTag(double tagID, double xTarget, double zTarget, double yawTarget){
+    public ArrayList<Double> alignTag(double tagID, double distanceFromTag){
+
+
+        double currentYawPosition = getBestYaw();
+        double yawTarget;
+        //angle until centered with tag
+        if (currentYawPosition < hubMinYaw){
+            double yawChange = currentYawPosition-hubMinYaw;
+            yawTarget = hubMinYaw;
+        }
+        else if(currentYawPosition > hubMaxYaw){
+            double yawChange =currentYawPosition - hubMaxYaw;
+            yawTarget = hubMaxYaw;
+        }
+        else{
+            yawTarget = currentYawPosition;
+        }
+
+        //find x and z target values
+        double zTarget = distanceFromTag * Math.sin(yawTarget*(180/Math.PI));
+        double xTarget = distanceFromTag * Math.cos(yawTarget*(180/Math.PI));
+        ArrayList<Double> returnStatement = new ArrayList<Double>();
+
+
         double zPosition = getDistZFromTag();
         double xPosition = getDistXFromTag();
-        double yawPosition = getYawFromTag();
+        double yawPosition = getBestYaw();
 
         //was all addition, change back if needed
         double xPositionChange = xTarget-xPosition;
@@ -182,38 +202,15 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("angle to drive at: ",totalYaw);//should be 35?
         ArrayList<Double> move = new ArrayList<Double>();
         move.add(xPositionChange);
-        move.add(zPosition);
-        move.add(totalYaw);
+        move.add(zPositionChange);
+        move.add(yawPositionChange);
+        
         return move;
 
 
     }
         
-    public ArrayList<Double> chooseTargetPosition(double tagID, double distanceFromTag){
-        double yawPosition = getBestYaw();
-        double yawNew;
-        //angle until centered with tag
-        if (yawPosition < hubMinYaw){
-            double yawChange = yawPosition-hubMinYaw;
-            yawNew = hubMinYaw;
-        }
-        else if(yawPosition > hubMaxYaw){
-            double yawChange = yawPosition - hubMaxYaw;
-            yawNew = hubMaxYaw;
-        }
-        else{
-            yawNew = yawPosition;
-        }
 
-        //find x and z target values
-        double zTarget = distanceFromTag * Math.sin(yawNew*(180/Math.PI));
-        double xTarget = distanceFromTag * Math.cos(yawNew*(180/Math.PI));
-        ArrayList<Double> returnStatement = new ArrayList<Double>();
-        returnStatement.add(xTarget);
-        returnStatement.add(zTarget);
-        returnStatement.add(yawNew);
-        return returnStatement;
-    }
 
     public void getBestTargetArea(double currentYaw){
         SmartDashboard.putString("Target Area: ","running");

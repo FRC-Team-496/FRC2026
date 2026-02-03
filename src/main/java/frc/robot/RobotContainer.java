@@ -9,6 +9,9 @@ package frc.robot;
 //import //com.studica.frc.*;
 
 import edu.wpi.first.wpilibj2.command.*;
+
+import java.util.ArrayList;
+
 import edu.wpi.first.math.MathUtil;
 
 import edu.wpi.first.wpilibj.GenericHID;
@@ -20,12 +23,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.Camera;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.LimelightAlignment;
 import frc.robot.subsystems.NavX;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 
-
+import java.math.*;;
 
 
 
@@ -122,14 +124,18 @@ public class RobotContainer {
             //new JoystickButton(m_driverController, 2)
             //.onTrue(new InstantCommand(() -> System.out.println("Command Run")));
 
-            new JoystickButton(m_driverController, 2)
-            .onTrue(new LimelightAlignment(m_camera));
 
+            //Math.clamp(m_camera.alignTag(1,.3).get(3).doubleValue(), 1.0, -1.0))
+
+            new JoystickButton(m_driverController, 2) //new LimelightAlignment(m_camera)
+            .onTrue(new SequentialCommandGroup(
+              new rotate(m_robotDrive,Math.abs(m_camera.alignTag(1,.3).get(2)),-1), new LimelightDrive()));
 
             new JoystickButton(m_driverController, 3)
             .onTrue(new moveStraight(m_robotDrive , 1, 1));
             //this works
             
+
             
 
   }
@@ -204,6 +210,39 @@ public class moveStraight extends Command{
     }
 
   }
+
+
+
+public class LimelightDrive extends Command{
+
+    private ArrayList<Double> pose;
+
+    public LimelightDrive(){
+        addRequirements(m_robotDrive);
+
+        // if issue, change camera.... to just m_robotdrive like others
+    }
+
+    @Override
+    public void initialize() {
+        pose =m_camera.alignTag(1,.3);
+        
+    }
+
+    @Override
+    public void execute() {
+        if (m_camera.getDetected_ID() == 1){
+            m_camera.getDriveSubsystem().drive(pose.get(0),pose.get(1),0,false,.5);
+        }
+    }
+
+    @Override
+    public boolean isFinished() {
+        return m_camera.getDetected_ID()!=1 || (m_camera.getDriveSubsystem().getPose().getX() == pose.get(1)) && (m_camera.getDriveSubsystem().getPose().getY()==pose.get(2));  
+    }
+
+}
+
   
 
 
@@ -267,7 +306,8 @@ public class moveStraight extends Command{
 
      
     
-}
-}
+  }
+  }
+
 
 
