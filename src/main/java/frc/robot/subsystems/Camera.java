@@ -33,8 +33,6 @@ public class Camera extends SubsystemBase {
     private static int neuralNetworkpipelineId;
 
     //need to figure out acutal measurements for these
-    private static double hubMinYaw=-45;
-    private static double hubMaxYaw=45;
     private static NavX m_gyro = new NavX();
     public Camera(DriveSubsystem driveSubsystem){
         this.driveSubsystem = driveSubsystem;
@@ -74,7 +72,7 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("roll Tag", tagToCamera[5]);
         
         SmartDashboard.putNumber("Tag ID", aprilTagID);
-        ArrayList<Double> targetMarkers = alignTag(1,.5);
+        ArrayList<Double> targetMarkers = alignTag(1,.5, -45,45);
 
         //getBestTargetArea(getBestYaw());
 
@@ -139,37 +137,37 @@ public class Camera extends SubsystemBase {
         //use both to get a more accurate value
         double gyroYaw = m_gyro.yaw();
         double limelightYaw = getYawFromTag();
-        double bestYaw = gyroYaw;
+        double bestYaw = limelightYaw;
         return bestYaw;
     }
 
-    public static double getResultantDistance(double x, double y){
+    public double getResultantDistance(double x, double y){
         return Math.sqrt(Math.pow(x, 2)+Math.pow(y,2));
     }
 
 
     //trig function that determines how far and at what angle to robot needs to go to get to a target position
-    public ArrayList<Double> alignTag(double tagID, double distanceFromTag){
+    public ArrayList<Double> alignTag(double tagID, double distanceFromTag, double minYaw, double maxYaw){
 
 
         double currentYawPosition = getBestYaw();
         double yawTarget;
         //angle until centered with tag
-        if (currentYawPosition < hubMinYaw){
-            double yawChange = currentYawPosition-hubMinYaw;
-            yawTarget = hubMinYaw;
+        if (currentYawPosition < minYaw){
+            double yawChange = currentYawPosition-minYaw;
+            yawTarget = minYaw;
         }
-        else if(currentYawPosition > hubMaxYaw){
-            double yawChange =currentYawPosition - hubMaxYaw;
-            yawTarget = hubMaxYaw;
+        else if(currentYawPosition > maxYaw){
+            double yawChange =currentYawPosition - maxYaw;
+            yawTarget = maxYaw;
         }
         else{
             yawTarget = currentYawPosition;
         }
 
         //find x and z target values
-        double zTarget = distanceFromTag * Math.sin(yawTarget*(180/Math.PI));
-        double xTarget = distanceFromTag * Math.cos(yawTarget*(180/Math.PI));
+        double zTarget = distanceFromTag * Math.sin(yawTarget*(Math.PI/180));
+        double xTarget = distanceFromTag * Math.cos(yawTarget*(Math.PI/180));
         ArrayList<Double> returnStatement = new ArrayList<Double>();
 
 
@@ -200,10 +198,21 @@ public class Camera extends SubsystemBase {
         //SmartDashboard.putNumber("Gyro Yaw position change: ");//should be -15 too
         SmartDashboard.putNumber("Distance to move: ", totalDistanceToMove);//should be .98
         SmartDashboard.putNumber("angle to drive at: ",totalYaw);//should be 35?
+        SmartDashboard.putNumber("Target Resultant Distance ", getResultantDistance(xTarget,zTarget));
+        SmartDashboard.putNumber("Current distance: ",getResultantDistance(getDistXFromTag(),getDistZFromTag()));
         ArrayList<Double> move = new ArrayList<Double>();
         move.add(xPositionChange);
+        SmartDashboard.putNumber("X Position Change",xPositionChange);
         move.add(zPositionChange);
+        SmartDashboard.putNumber("Z Position Change", -zPosition);
+        SmartDashboard.putNumber("Z Position Change", zTarget);
         move.add(yawPositionChange);
+        if (yawPositionChange > 0){
+            move.add(1.0);
+        }
+        else{
+            move.add(-1.0);
+        }
         
         return move;
 
@@ -212,7 +221,7 @@ public class Camera extends SubsystemBase {
         
 
 
-    public void getBestTargetArea(double currentYaw){
+    public boolean getBestTargetArea(double currentYaw){
         SmartDashboard.putString("Target Area: ","running");
         double taCurrent = getTargetArea();
         double taTest=0;
@@ -246,6 +255,7 @@ public class Camera extends SubsystemBase {
                 }
             }
         }
+        return true;
     }
 
     public ArrayList<Double> getAreaDistance(double distance, double yaw){

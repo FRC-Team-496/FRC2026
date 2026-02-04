@@ -117,8 +117,11 @@ public class RobotContainer {
           //Camera camera = new Camera();
 
 
-            new JoystickButton(m_driverController, 1) 
-            .onTrue(new rotate(m_robotDrive, 1, 1));
+            /*new JoystickButton(m_driverController, 1) 
+            .onTrue(new rotate(m_robotDrive, 1, 1));*/
+
+            new JoystickButton(m_driverController, 1)
+            .onTrue(new SequentialCommandGroup(new targetArea(),new RunCommand(() -> m_robotDrive.drive(m_camera.getAreaDistance(1, m_camera.getBestYaw()).get(1), m_camera.getAreaDistance(1, m_camera.getBestYaw()).get(0),0, false,.95 ))));
 
 
             //new JoystickButton(m_driverController, 2)
@@ -129,7 +132,7 @@ public class RobotContainer {
 
             new JoystickButton(m_driverController, 2) //new LimelightAlignment(m_camera)
             .onTrue(new SequentialCommandGroup(
-              new rotate(m_robotDrive,Math.abs(m_camera.alignTag(1,.3).get(2)),-1), new LimelightDrive()));
+              new rotate(m_robotDrive,Math.abs(m_camera.alignTag(1,1,-45,45).get(2)),m_camera.alignTag(1,.1,-45,45).get(3).intValue()), new LimelightDrive()));
 
             new JoystickButton(m_driverController, 3)
             .onTrue(new moveStraight(m_robotDrive , 1, 1));
@@ -176,8 +179,26 @@ public class moveStraight extends Command{
     public boolean isFinished() {
         return Math.abs(m_robotDrive.getPose().getX() - startX) > (distance );  
     }
+}
+    
+public class targetArea extends Command{
+  private boolean done;
+  public targetArea(){
+    addRequirements(m_robotDrive);
+    }
 
+  @Override
+  public void execute() {
+      done = m_camera.getBestTargetArea(m_camera.getBestYaw());
   }
+
+  @Override
+  public boolean isFinished() {
+      return m_camera.getDetected_ID()!=1 || done;  
+  }
+}
+
+  
 
   public class rotate extends Command{
     DriveSubsystem m_robotDrive;
@@ -225,20 +246,20 @@ public class LimelightDrive extends Command{
 
     @Override
     public void initialize() {
-        pose =m_camera.alignTag(1,.3);
+        pose =m_camera.alignTag(1,1,-45,45);
         
     }
 
     @Override
     public void execute() {
         if (m_camera.getDetected_ID() == 1){
-            m_camera.getDriveSubsystem().drive(pose.get(0),pose.get(1),0,false,.5);
+            m_camera.getDriveSubsystem().drive(-pose.get(1),pose.get(0),0,false,.95);
         }
     }
 
     @Override
     public boolean isFinished() {
-        return m_camera.getDetected_ID()!=1 || (m_camera.getDriveSubsystem().getPose().getX() == pose.get(1)) && (m_camera.getDriveSubsystem().getPose().getY()==pose.get(2));  
+        return m_camera.getDetected_ID()!=1 || Math.abs(1 - m_camera.getResultantDistance(m_camera.getDistXFromTag(), m_camera.getDistZFromTag())) < .1;  
     }
 
 }
