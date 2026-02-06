@@ -130,9 +130,13 @@ public class RobotContainer {
 
             //Math.clamp(m_camera.alignTag(1,.3).get(3).doubleValue(), 1.0, -1.0))
 
+            /*new JoystickButton(m_driverController, 2) //new LimelightAlignment(m_camera)
+            .onTrue(new SequentialCommandGroup(
+              new rotate(m_robotDrive,Math.abs(m_camera.alignTag(1,1,-15,15).get(2)),m_camera.alignTag(1,.1,-15,15).get(3).intValue()), new LimelightDrive()));*/
+
             new JoystickButton(m_driverController, 2) //new LimelightAlignment(m_camera)
             .onTrue(new SequentialCommandGroup(
-              new rotate(m_robotDrive,Math.abs(m_camera.alignTag(1,1,-45,45).get(2)),m_camera.alignTag(1,.1,-45,45).get(3).intValue()), new LimelightDrive()));
+             new LimelightDrive()));
 
             new JoystickButton(m_driverController, 3)
             .onTrue(new moveStraight(m_robotDrive , 1, 1));
@@ -246,7 +250,7 @@ public class LimelightDrive extends Command{
 
     @Override
     public void initialize() {
-        pose =m_camera.alignTag(1,1,-45,45);
+        pose =m_camera.alignTag(1,1,-15,15);
         
     }
 
@@ -259,7 +263,7 @@ public class LimelightDrive extends Command{
 
     @Override
     public boolean isFinished() {
-        return m_camera.getDetected_ID()!=1 || Math.abs(1 - m_camera.getResultantDistance(m_camera.getDistXFromTag(), m_camera.getDistZFromTag())) < .1;  
+        return m_camera.getDetected_ID()!=1 || Math.abs(1 - m_camera.getResultantDistance(m_camera.getDistXFromTag(), m_camera.getDistZFromTag())) < .05;  
     }
 
 }

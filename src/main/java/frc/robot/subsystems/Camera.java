@@ -190,14 +190,13 @@ public class Camera extends SubsystemBase {
         //numbers are based off of a hub angle of 35 and current yaw of 40
         SmartDashboard.putNumber("X Position: ",xPosition); //should be .5
         SmartDashboard.putNumber("Z position: " ,zPosition);//should be 1.5
-        SmartDashboard.putNumber("Camera Yaw: ",yawPosition);//should be 40
         SmartDashboard.putNumber("X Position change: ",xPositionChange);//should be .3
         SmartDashboard.putNumber("Z position change: " ,zPositionChange);//should be .93
+        SmartDashboard.putNumber("Yaw target",yawTarget);
+        SmartDashboard.putNumber("Current Yaw Position",yawPosition);
         SmartDashboard.putNumber("Camera Yaw position change: " ,yawPositionChange);//should be -15
-        SmartDashboard.putNumber("Total Yaw",totalYaw);
         //SmartDashboard.putNumber("Gyro Yaw position change: ");//should be -15 too
         SmartDashboard.putNumber("Distance to move: ", totalDistanceToMove);//should be .98
-        SmartDashboard.putNumber("angle to drive at: ",totalYaw);//should be 35?
         SmartDashboard.putNumber("Target Resultant Distance ", getResultantDistance(xTarget,zTarget));
         SmartDashboard.putNumber("Current distance: ",getResultantDistance(getDistXFromTag(),getDistZFromTag()));
         ArrayList<Double> move = new ArrayList<Double>();
