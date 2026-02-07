@@ -70,9 +70,10 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("pitch Tag", tagToCamera[3]);
         SmartDashboard.putNumber("yaw Tag", tagToCamera[4]);
         SmartDashboard.putNumber("roll Tag", tagToCamera[5]);
+        SmartDashboard.putNumber("x crosshair",getX());
         
         SmartDashboard.putNumber("Tag ID", aprilTagID);
-        ArrayList<Double> targetMarkers = alignTag(1,.5, -45,45);
+        alignTag(1,1,"a");
 
         //getBestTargetArea(getBestYaw());
 
@@ -147,43 +148,24 @@ public class Camera extends SubsystemBase {
 
 
     //trig function that determines how far and at what angle to robot needs to go to get to a target position
-    public ArrayList<Double> alignTag(double tagID, double distanceFromTag, double minYaw, double maxYaw){
-
-
-        double currentYawPosition = getBestYaw();
-        double yawTarget;
-        //angle until centered with tag
-        if (currentYawPosition < minYaw){
-            double yawChange = currentYawPosition-minYaw;
-            yawTarget = minYaw;
-        }
-        else if(currentYawPosition > maxYaw){
-            double yawChange =currentYawPosition - maxYaw;
-            yawTarget = maxYaw;
-        }
-        else{
-            yawTarget = currentYawPosition;
-        }
-
-        //find x and z target values
-        double zTarget = distanceFromTag * Math.sin(yawTarget*(Math.PI/180));
-        double xTarget = distanceFromTag * Math.cos(yawTarget*(Math.PI/180));
-        ArrayList<Double> returnStatement = new ArrayList<Double>();
-
-
+    public double alignTag(double tagID, double distanceFromTag, String orientation){
+        double yawTarget = getBestYaw();
+        double xTarget;
+        double zTarget;
         double zPosition = getDistZFromTag();
         double xPosition = getDistXFromTag();
-        double yawPosition = getBestYaw();
+        //find x and z target values
+        xTarget = distanceFromTag * Math.sin(yawTarget*(Math.PI/180));
+        zTarget = distanceFromTag * Math.cos(yawTarget*(Math.PI/180));
+        
 
-        //was all addition, change back if needed
+        zTarget *= -1;
+
         double xPositionChange = xTarget-xPosition;
-        double zPositionChange = zPosition-zTarget;
-        double yawPositionChange = yawTarget - yawPosition;
+        double zPositionChange = zTarget-zPosition;
+        //was all addition, change back if needed
 
         double totalDistanceToMove = getResultantDistance(xPositionChange, zPositionChange);
-        double totalYaw = Math.atan2(xPositionChange,-zPositionChange);
-        totalYaw = totalYaw*(180/Math.PI);
-        totalYaw = totalYaw - yawPosition; 
         //double gyroYaw = m_gyro.yaw();
         //gyroYaw = totalYaw - gyroYaw;
         //should check differences between gyro and limelight yaw - which is closer to expected value
@@ -193,32 +175,21 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("X Position change: ",xPositionChange);//should be .3
         SmartDashboard.putNumber("Z position change: " ,zPositionChange);//should be .93
         SmartDashboard.putNumber("Yaw target",yawTarget);
-        SmartDashboard.putNumber("Current Yaw Position",yawPosition);
-        SmartDashboard.putNumber("Camera Yaw position change: " ,yawPositionChange);//should be -15
         //SmartDashboard.putNumber("Gyro Yaw position change: ");//should be -15 too
         SmartDashboard.putNumber("Distance to move: ", totalDistanceToMove);//should be .98
         SmartDashboard.putNumber("Target Resultant Distance ", getResultantDistance(xTarget,zTarget));
         SmartDashboard.putNumber("Current distance: ",getResultantDistance(getDistXFromTag(),getDistZFromTag()));
-        ArrayList<Double> move = new ArrayList<Double>();
-        move.add(xPositionChange);
-        SmartDashboard.putNumber("X Position Change",xPositionChange);
-        move.add(zPositionChange);
-        SmartDashboard.putNumber("Z Position Change", -zPosition);
-        SmartDashboard.putNumber("Z Position Change", zTarget);
-        move.add(yawPositionChange);
-        if (yawPositionChange > 0){
-            move.add(1.0);
+        if (getResultantDistance(xPosition, zPosition) > distanceFromTag){
+            return totalDistanceToMove;
         }
         else{
-            move.add(-1.0);
+            return -totalDistanceToMove;
         }
         
-        return move;
 
 
     }
         
-
 
     public boolean getBestTargetArea(double currentYaw){
         SmartDashboard.putString("Target Area: ","running");

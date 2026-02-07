@@ -130,17 +130,27 @@ public class RobotContainer {
 
             //Math.clamp(m_camera.alignTag(1,.3).get(3).doubleValue(), 1.0, -1.0))
 
-            /*new JoystickButton(m_driverController, 2) //new LimelightAlignment(m_camera)
-            .onTrue(new SequentialCommandGroup(
-              new rotate(m_robotDrive,Math.abs(m_camera.alignTag(1,1,-15,15).get(2)),m_camera.alignTag(1,.1,-15,15).get(3).intValue()), new LimelightDrive()));*/
-
             new JoystickButton(m_driverController, 2) //new LimelightAlignment(m_camera)
-            .onTrue(new SequentialCommandGroup(
-             new LimelightDrive()));
+            .onTrue(Thread tagDo = new Thread(new checkTag())::
+            tagDo.start());
+              
+            
+
+
+
+
+               
+            
+            
+            
+            
 
             new JoystickButton(m_driverController, 3)
             .onTrue(new moveStraight(m_robotDrive , 1, 1));
             //this works
+
+            
+
             
 
             
@@ -202,6 +212,20 @@ public class targetArea extends Command{
   }
 }
 
+
+public class checkTag implements Runnable{
+  @Override
+  public void run(){
+    if(m_camera.getDetected_ID()==16){
+      new SequentialCommandGroup(new lineUpToCenter(), new LimelightDrive(1,"a",9), new lineUpToCenter());
+    }
+    else if(m_camera.getDetected_ID()==9){
+      new SequentialCommandGroup(new RunCommand(()-> m_robotDrive.drive(0,0,-m_camera.getBestYaw(),false,.5)), new LimelightDrive(.5,"z",16), new lineUpToCenter());
+    }
+  }
+}
+
+
   
 
   public class rotate extends Command{
@@ -226,7 +250,10 @@ public class targetArea extends Command{
     @Override
     public void execute() {
       System.out.println(m_robotDrive.getHeading());
-      m_robotDrive.drive(0, 0.0, 1 * direction, false, .3); //-.02
+      if (degrees !=0.0){
+        m_robotDrive.drive(0, 0.0, 1 * direction, false, .3); //-.02
+      }
+      
     }
 
     @Override
@@ -240,9 +267,16 @@ public class targetArea extends Command{
 
 public class LimelightDrive extends Command{
 
-    private ArrayList<Double> pose;
+    private double pose;
+    private double distance;
+    private String orientation;
+    private double tag;
 
-    public LimelightDrive(){
+
+    public LimelightDrive(double distance, String orientation, double tag){
+        this.distance = distance;
+        this.orientation = orientation;
+        this.tag= tag;
         addRequirements(m_robotDrive);
 
         // if issue, change camera.... to just m_robotdrive like others
@@ -250,21 +284,62 @@ public class LimelightDrive extends Command{
 
     @Override
     public void initialize() {
-        pose =m_camera.alignTag(1,1,-15,15);
         
+        pose =m_camera.alignTag(m_camera.getDetected_ID(),distance,orientation);
     }
 
     @Override
     public void execute() {
-        if (m_camera.getDetected_ID() == 1){
-            m_camera.getDriveSubsystem().drive(-pose.get(1),pose.get(0),0,false,.95);
+        if (m_camera.getDetected_ID() == tag){
+          if(orientation.equals("a")){
+            m_camera.getDriveSubsystem().drive(pose,0,0,false,.5);
         }
-    }
+          if(orientation.equals("z")){
+            m_camera.getDriveSubsystem().drive(0,pose,0,false,.5);
+        }
+          }
+      }
+    
 
     @Override
     public boolean isFinished() {
         return m_camera.getDetected_ID()!=1 || Math.abs(1 - m_camera.getResultantDistance(m_camera.getDistXFromTag(), m_camera.getDistZFromTag())) < .05;  
     }
+  }
+
+public class lineUpToCenter extends Command{
+
+  private double currentX;
+
+  public lineUpToCenter(){
+      addRequirements(m_robotDrive);
+  }
+
+  @Override
+  public void initialize() {
+      currentX = m_camera.getX();
+  }
+
+  @Override
+  public void execute() {
+    currentX = m_camera.getX();
+    if (currentX !=0){
+      SmartDashboard.putNumber("lining up", currentX);
+      if (currentX>0){
+        SmartDashboard.putNumber("lining up >0", currentX);
+        m_robotDrive.drive(0, 0, -1, false, .8);
+      }
+      else{
+        SmartDashboard.putNumber("lining up <0", currentX);
+        m_robotDrive.drive(0,0,1,false,.8);
+      }
+    }
+  }
+
+  @Override
+  public boolean isFinished() {
+    return m_camera.getDetected_ID()!=1 || Math.abs(1 - currentX) < 1;  
+  }
 
 }
 
