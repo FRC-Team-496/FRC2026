@@ -131,23 +131,22 @@ public class RobotContainer {
             //Math.clamp(m_camera.alignTag(1,.3).get(3).doubleValue(), 1.0, -1.0))
 
             new JoystickButton(m_driverController, 2) //new LimelightAlignment(m_camera)
-            .onTrue(Thread tagDo = new Thread(new checkTag())::
-            tagDo.start());
+            .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(), new LimelightDrive(1,"a",9),new InstantCommand(() -> System.out.println("instant command failed")) , Camera.getDetected_ID()==16)));
               
-            
 
-
-
-
-               
-            
-            
-            
-            
+            /*new JoystickButton(m_driverController, 3)
+            .onTrue(new moveStraight(m_robotDrive , 1, 1));*/
+            //this works
 
             new JoystickButton(m_driverController, 3)
-            .onTrue(new moveStraight(m_robotDrive , 1, 1));
-            //this works
+            .onTrue(new InstantCommand(() -> {
+              if (m_camera.getDetected_ID() == (int)(16)){
+                new SequentialCommandGroup(new lineUpToCenter(), new LimelightDrive(1,"a",9), new lineUpToCenter());
+              }
+              else{
+                new InstantCommand(() -> System.out.println("instant command failed"));
+              }
+            }));
 
             
 
@@ -213,7 +212,7 @@ public class targetArea extends Command{
 }
 
 
-public class checkTag implements Runnable{
+/*public class checkTag implements Runnable{
   @Override
   public void run(){
     if(m_camera.getDetected_ID()==16){
@@ -223,7 +222,7 @@ public class checkTag implements Runnable{
       new SequentialCommandGroup(new RunCommand(()-> m_robotDrive.drive(0,0,-m_camera.getBestYaw(),false,.5)), new LimelightDrive(.5,"z",16), new lineUpToCenter());
     }
   }
-}
+}*/
 
 
   
