@@ -11,6 +11,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.*;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -25,6 +27,8 @@ import frc.robot.subsystems.Camera;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.NavX;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+
+import java.util.function.BooleanSupplier;
 
 
 import java.math.*;;
@@ -131,22 +135,21 @@ public class RobotContainer {
             //Math.clamp(m_camera.alignTag(1,.3).get(3).doubleValue(), 1.0, -1.0))
 
             new JoystickButton(m_driverController, 2) //new LimelightAlignment(m_camera)
-            .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(), new LimelightDrive(1,"a",9),new InstantCommand(() -> System.out.println("instant command failed")) , Camera.getDetected_ID()==16)));
+            .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(1), new LimelightDrive(1,"a",1), new lineUpToCenter(1)), new InstantCommand(() -> System.out.println("false")), () -> m_camera.getDetected_ID()==1)
+            );
               
 
             /*new JoystickButton(m_driverController, 3)
             .onTrue(new moveStraight(m_robotDrive , 1, 1));*/
             //this works
 
-            new JoystickButton(m_driverController, 3)
-            .onTrue(new InstantCommand(() -> {
-              if (m_camera.getDetected_ID() == (int)(16)){
-                new SequentialCommandGroup(new lineUpToCenter(), new LimelightDrive(1,"a",9), new lineUpToCenter());
-              }
-              else{
-                new InstantCommand(() -> System.out.println("instant command failed"));
-              }
-            }));
+           /* new JoystickButton(m_driverController, 3)
+            .whileTrue(Commands.defer(
+              () -> Commands.select(Map.of(
+                1, new SequentialCommandGroup(new lineUpToCenter(), new LimelightDrive(1,"a",1), new lineUpToCenter()))
+                , () -> m_camera.getDetected_ID()), Set.of(m_robotDrive)
+              ));*/
+              
 
             
 
@@ -291,10 +294,14 @@ public class LimelightDrive extends Command{
     public void execute() {
         if (m_camera.getDetected_ID() == tag){
           if(orientation.equals("a")){
-            m_camera.getDriveSubsystem().drive(pose,0,0,false,.5);
+            if((1-(m_camera.getResultantDistance(m_camera.getDistXFromTag(),m_camera.getDistZFromTag())))<.05){
+              m_camera.getDriveSubsystem().drive(.6,0,0,false,.5);}
+            else{
+              m_camera.getDriveSubsystem().drive(-.6,0,0,false,.5);
+            }
         }
           if(orientation.equals("z")){
-            m_camera.getDriveSubsystem().drive(0,pose,0,false,.5);
+            m_camera.getDriveSubsystem().drive(0,.8,0,false,.5);
         }
           }
       }
@@ -302,16 +309,18 @@ public class LimelightDrive extends Command{
 
     @Override
     public boolean isFinished() {
-        return m_camera.getDetected_ID()!=1 || Math.abs(1 - m_camera.getResultantDistance(m_camera.getDistXFromTag(), m_camera.getDistZFromTag())) < .05;  
+        return m_camera.getDetected_ID()!=tag || Math.abs(1 - m_camera.getResultantDistance(m_camera.getDistXFromTag(), m_camera.getDistZFromTag())) < .09;  
     }
   }
 
 public class lineUpToCenter extends Command{
 
   private double currentX;
+  private double tag;
 
-  public lineUpToCenter(){
-      addRequirements(m_robotDrive);
+  public lineUpToCenter(double tag){
+    this.tag = tag;
+    addRequirements(m_robotDrive);
   }
 
   @Override
@@ -337,7 +346,7 @@ public class lineUpToCenter extends Command{
 
   @Override
   public boolean isFinished() {
-    return m_camera.getDetected_ID()!=1 || Math.abs(1 - currentX) < 1;  
+    return m_camera.getDetected_ID()!=tag || Math.abs(1 - currentX) < 1;  
   }
 
 }

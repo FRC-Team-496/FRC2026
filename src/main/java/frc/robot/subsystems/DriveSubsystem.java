@@ -110,6 +110,8 @@ public class DriveSubsystem extends SubsystemBase {
    * @param fieldRelative Whether the provided x and y speeds are relative to the
    *                      field.
    */
+  //rotation is radians!!!!!!!
+  //speed paramters are velocities
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, double throttle) {
     // Adjust input based on max speed
     SmartDashboard.putNumber("xSpeed", xSpeed);
