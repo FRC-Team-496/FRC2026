@@ -118,7 +118,7 @@ public class RobotContainer {
 
 
             new JoystickButton(m_driverController, 1) 
-            .onTrue(new rotate(m_robotDrive, 1, 1));
+            .onTrue(new rotate(m_robotDrive, 180, 1));
 
 
             //new JoystickButton(m_driverController, 2)
@@ -184,6 +184,10 @@ public class moveStraight extends Command{
     private double degrees; 
     private double startRot;
     private int direction;
+
+
+
+
 
     public rotate(DriveSubsystem m_robotDrive, double degrees, int direction){
       this.m_robotDrive = m_robotDrive;
