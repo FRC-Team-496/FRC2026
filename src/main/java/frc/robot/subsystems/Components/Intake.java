@@ -4,24 +4,24 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 
-public class Belt {
-    SparkMax motor1;
+public class Intake {
+    SparkMax IntakeWheels;
     int mode = 0;
-    public Belt(){
-        motor1 = new SparkMax(8, MotorType.kBrushless);
+    public Intake(){
+        IntakeWheels = new SparkMax(4, MotorType.kBrushless);
     }
 
     public void toggle(){
-        if (mode == 1){
-            motor1.set(-.6);
+        if (mode == 0){
+            IntakeWheels.set(1);
         }
         else{
             stop();
         }
-        mode = (mode + 1) % 3;
+        mode = (mode + 1) % 2;
     }
 
     public void stop(){
-        motor1.set(0);
+        IntakeWheels.set(0);
     }
 }

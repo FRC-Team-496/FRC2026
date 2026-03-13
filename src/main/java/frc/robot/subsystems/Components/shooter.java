@@ -7,19 +7,30 @@ public class shooter {
     SparkMax shooters;
     SparkMax elevator;
     double fixedSpeed;
+    int mode = 0;
     public shooter(){
         shooters= new SparkMax(2, MotorType.kBrushless);
         elevator= new SparkMax(13, MotorType.kBrushless);
-        fixedSpeed=.3;
-    //idk if the motor type is correct and the number needs to be changed for both
+        fixedSpeed=1;
     }
 
-    public void start(double speed){
-        shooters.set(speed);
-        elevator.set(fixedSpeed);
-        //idk if speed is correct
+    public void toggle(double speed){
+        if(mode == 0){
+            shooters.set(speed);
+        }
+        else if (mode == 1){
+            elevator.set(-fixedSpeed);
+        }
+        else{
+            stop();
+
+        }
+        mode = (mode + 1) % 3;
     }
 
+
+
+    
     public void stop(){
         shooters.set(0);
         elevator.set(0);
