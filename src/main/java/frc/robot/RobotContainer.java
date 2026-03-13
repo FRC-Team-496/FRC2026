@@ -133,11 +133,45 @@ public class RobotContainer {
 
 
             //Math.clamp(m_camera.alignTag(1,.3).get(3).doubleValue(), 1.0, -1.0))
+            /*new JoystickButton(m_driverController, 2) // new LimelightAlignment(m_camera)
+    .onTrue(
+        new ConditionalCommand( //hub
 
-            new JoystickButton(m_driverController, 2) //new LimelightAlignment(m_camera)
-            .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(1), new LimelightDrive(1,"a",1), new lineUpToCenter(1)), new InstantCommand(() -> System.out.println("false")), () -> m_camera.getDetected_ID()==1)
-            );
-              
+            new SequentialCommandGroup(
+                new lineUpToCenter(1),
+                new LimelightDrive(1, "a", 1),
+                new lineUpToCenter(1)
+            ),
+
+            new ConditionalCommand( //lines up straight to outpost
+
+                new SequentialCommandGroup(
+                    new RunCommand(
+                        () -> m_robotDrive.drive(0, 0, -Camera.getBestYaw(), false, 0.5),
+                        m_robotDrive
+                    ),
+                    new LimelightDrive(0, "z", 16),
+                    new LimelightDrive(.3, null, startTime)
+                ),
+
+                new ConditionalCommand( 
+                  new SequentialCommandGroup(
+                    new RunCommand(null, m_robotDrive)
+                  ), 
+                  null, 
+                  () -> m_camera.getDetected_ID()==13),
+
+                () -> m_camera.getDetected_ID() == 13
+            ),
+
+            () -> m_camera.getDetected_ID() == 1
+        )
+    );*/
+
+
+           
+
+ 
 
             /*new JoystickButton(m_driverController, 3)
             .onTrue(new moveStraight(m_robotDrive , 1, 1));*/
@@ -235,10 +269,6 @@ public class targetArea extends Command{
     private double degrees; 
     private double startRot;
     private int direction;
-
-
-
-
 
     public rotate(DriveSubsystem m_robotDrive, double degrees, int direction){
       this.m_robotDrive = m_robotDrive;
