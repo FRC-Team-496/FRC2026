@@ -1,14 +1,14 @@
 package frc.robot.subsystems.Components;
 
-import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
 
 public class Belt {
     SparkMax motor1;
 
     public Belt(){
-        motor1= new SparkMax(67,null);
-    //idk if the motor type is correct and the number needs to be changed for both
+        motor1 = new SparkMax(8, MotorType.kBrushless);
     }
 
     public void start(){

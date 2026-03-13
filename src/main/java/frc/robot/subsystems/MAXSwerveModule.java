@@ -9,10 +9,10 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -27,8 +27,8 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
 
 public class MAXSwerveModule {
-  private final SparkMax m_drivingSparkMax;
-  private final SparkMax m_turningSparkMax;
+  private final SparkFlex m_drivingSparkFlex;
+  private final SparkFlex m_turningSparkFlex;
   
 
   private final RelativeEncoder m_drivingEncoder;
@@ -50,12 +50,13 @@ public class MAXSwerveModule {
    */
   public MAXSwerveModule(int drivingCANId, int turningCANId, double chassisAngularOffset) {
     this.drivingCANId = drivingCANId;
-    m_drivingSparkMax = new SparkMax(drivingCANId, MotorType.kBrushless);
-    m_turningSparkMax = new SparkMax(turningCANId, MotorType.kBrushless);
+    m_drivingSparkFlex = new SparkFlex(drivingCANId, MotorType.kBrushless);
+    m_turningSparkFlex = new SparkFlex(turningCANId, MotorType.kBrushless);
     // Factory reset, so we get the SPARKS MAX to a known state before configuring
     // them. This is useful in case a SPARK MAX is swapped out.
-    SparkMaxConfig drivingConfig = new SparkMaxConfig();
+    SparkFlexConfig drivingConfig = new SparkFlexConfig();
 
+   
     drivingConfig
             .idleMode(IdleMode.kBrake)
             .smartCurrentLimit(ModuleConstants.kDrivingMotorCurrentLimit);
@@ -70,9 +71,9 @@ public class MAXSwerveModule {
               ModuleConstants.kDrivingFF)
         .outputRange(ModuleConstants.kDrivingMinOutput,
                     ModuleConstants.kDrivingMaxOutput);        
-    m_drivingSparkMax.configure(drivingConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_drivingSparkFlex.configure(drivingConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    SparkMaxConfig turningConfig = new SparkMaxConfig();
+    SparkFlexConfig turningConfig = new SparkFlexConfig();
     turningConfig
         
         .idleMode(IdleMode.kBrake)
@@ -97,14 +98,14 @@ public class MAXSwerveModule {
 
 
         //.pid(1.0, 0, 0);
-    m_turningSparkMax.configure(turningConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_turningSparkFlex.configure(turningConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
 
 
     // Setup encoders and PID controllers for the driving and turning SPARKS MAX.
 
-    m_drivingEncoder = m_drivingSparkMax.getEncoder();
-    m_turningEncoder = m_turningSparkMax.getAbsoluteEncoder(); //removed "Type.kDutyCycle" from parameter
+    m_drivingEncoder = m_drivingSparkFlex.getEncoder();
+    m_turningEncoder = m_turningSparkFlex.getAbsoluteEncoder(); //removed "Type.kDutyCycle" from parameter
 
 
 
@@ -113,8 +114,8 @@ public class MAXSwerveModule {
 
 
 
-    m_drivingPIDController = m_drivingSparkMax.getClosedLoopController();
-    m_turningPIDController = m_turningSparkMax.getClosedLoopController();
+    m_drivingPIDController = m_drivingSparkFlex.getClosedLoopController();
+    m_turningPIDController = m_turningSparkFlex.getClosedLoopController();
     // m_drivingPIDController.setFeedbackDevice(m_drivingEncoder);
     // m_turningPIDController.setFeedbackDevice(m_turningEncoder);
 
@@ -216,8 +217,8 @@ public class MAXSwerveModule {
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
     
-    m_drivingPIDController.setReference(optimizedDesiredState.speedMetersPerSecond, SparkMax.ControlType.kVelocity);
-    m_turningPIDController.setReference(optimizedDesiredState.angle.getRadians(), SparkMax.ControlType.kPosition);
+    m_drivingPIDController.setReference(optimizedDesiredState.speedMetersPerSecond, SparkFlex.ControlType.kVelocity);
+    m_turningPIDController.setReference(optimizedDesiredState.angle.getRadians(), SparkFlex.ControlType.kPosition);
     if(drivingCANId == DriveConstants.kFrontLeftDrivingCanId){
       SmartDashboard.putNumber("FL input Rot", desiredState.angle.getRadians());
       SmartDashboard.putNumber("Front Left cmd rot", optimizedDesiredState.angle.getRadians());

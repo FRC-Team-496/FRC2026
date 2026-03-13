@@ -1,15 +1,15 @@
 package frc.robot.subsystems.Components;
 
-import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 public class shooter {
     SparkMax shooters;
     SparkMax elevator;
     double fixedSpeed;
     public shooter(){
-        shooters= new SparkMax(67,null);
-        elevator= new SparkMax(67, null);
+        shooters= new SparkMax(2, MotorType.kBrushless);
+        elevator= new SparkMax(13, MotorType.kBrushless);
         fixedSpeed=.3;
     //idk if the motor type is correct and the number needs to be changed for both
     }
