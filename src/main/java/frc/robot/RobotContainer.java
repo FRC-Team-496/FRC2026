@@ -129,6 +129,10 @@ public class RobotContainer {
             // .onTrue(new SequentialCommandGroup(new targetArea(),new RunCommand(() -> m_robotDrive.drive(m_camera.getAreaDistance(1, m_camera.getBestYaw()).get(1), m_camera.getAreaDistance(1, m_camera.getBestYaw()).get(0),0, false,.95 ))));
 
 
+            new JoystickButton(m_driverController, 6).onTrue(
+              Auto2
+            );
+
             new JoystickButton(m_driverController, 4)
             .onTrue(new ParallelCommandGroup(
               new InstantCommand(() -> m_shooter.toggle()), 
@@ -144,8 +148,8 @@ public class RobotContainer {
 
              new JoystickButton(m_driverController, 2) 
             .onTrue(new ConditionalCommand(
-              new SequentialCommandGroup(
-                new lineUpToCenter(m_camera.getDetected_ID()), new LimelightDrive(1,"a",m_camera.getDetected_ID()), new lineUpToCenter(m_camera.getDetected_ID())
+              new SequentialCommandGroup( new InstantCommand( () -> System.out.println("true")),
+                new lineUpToCenter(10), new LimelightDrive(2.1,"a",10), new lineUpToCenter(10)
               ), 
               new ConditionalCommand(
                 new SequentialCommandGroup(
@@ -153,7 +157,7 @@ public class RobotContainer {
                 ),
                 new ConditionalCommand(new InstantCommand(() -> System.out.println("false")), new InstantCommand(() -> System.out.println("false")), () -> m_camera.getDetected_ID() == 8),
                 () -> m_camera.getDetected_ID() == 13 || m_camera.getDetected_ID() ==29),
-              () -> m_camera.getDetected_ID()==10 || m_camera.getDetected_ID() ==25
+              () -> m_camera.getDetected_ID()==10 || m_camera.getDetected_ID() ==9
             ));
               
 
@@ -212,6 +216,11 @@ public class moveStraight extends Command{
     @Override
     public boolean isFinished() {
         return Math.abs(m_robotDrive.getPose().getX() - startX) > (distance );  
+    }
+
+    @Override
+    public void end(boolean interrupted){
+      m_robotDrive.drive(0,0,0,false,0);
     }
 }
     
@@ -316,7 +325,7 @@ public class LimelightDrive extends Command{
     public void execute() {
         if (m_camera.getDetected_ID() == tag){
           if(orientation.equals("a")){
-            if((1-(m_camera.getResultantDistance(m_camera.getDistXFromTag(),m_camera.getDistZFromTag())))<.05){
+            if((distance-(m_camera.getResultantDistance(m_camera.getDistXFromTag(),m_camera.getDistZFromTag())))<.05){
               m_camera.getDriveSubsystem().drive(.6,0,0,false,.5);}
             else{
               m_camera.getDriveSubsystem().drive(-.6,0,0,false,.5);
@@ -331,7 +340,7 @@ public class LimelightDrive extends Command{
 
     @Override
     public boolean isFinished() {
-        return m_camera.getDetected_ID()!=tag || Math.abs(1 - m_camera.getResultantDistance(m_camera.getDistXFromTag(), m_camera.getDistZFromTag())) < .09;  
+        return m_camera.getDetected_ID()!=tag || Math.abs(distance - m_camera.getResultantDistance(m_camera.getDistXFromTag(), m_camera.getDistZFromTag())) < .09;  
     }
   }
 
@@ -408,7 +417,12 @@ new ParallelCommandGroup(
 
 
 
+SequentialCommandGroup Auto2 = new SequentialCommandGroup(
+        new InstantCommand(() -> System.out.println("iteration")),
+        new moveStraight(m_robotDrive, 1, -1),
+        shoot
 
+        );
 
 
 
@@ -444,12 +458,19 @@ new ParallelCommandGroup(
     mode = SmartDashboard.getNumber("Autonomous Mode", 1.0);
     System.out.println(mode);
     intmode = (int) mode;
-    startTime = System.currentTimeMillis();
-    CommandScheduler.getInstance().schedule(new moveStraight(m_robotDrive, 1.0, 1));
 
 
 
    
+    switch(intmode){
+      case(1):
+      case(2):
+        CommandScheduler.getInstance().schedule(Auto2);
+      case(3):
+      case(4):
+      case(5):
+      case(6):
+    }
 
   }
 
@@ -457,33 +478,8 @@ new ParallelCommandGroup(
 
   public void autonomousPeriodic(){
     
-
-    switch(intmode){
-      case(1):
-
-      case(2):
-      CommandScheduler.getInstance().schedule(
-        new SequentialCommandGroup(
-          new InstantCommand(() -> System.out.println("iteration")),
-          new moveStraight(m_robotDrive, 1, -1),
-          shoot
-
-        )
-
-
-      );
-
-      case(3):
-
-      case(4):
-
-      case(5):
-
-      case(6):
-
-
-
-    }
+    
+    
     /*
      *   case(2):
      * 
@@ -502,7 +498,7 @@ new ParallelCommandGroup(
     
 
      
-    
+
   }
   }
 

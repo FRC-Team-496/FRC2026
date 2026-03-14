@@ -8,7 +8,7 @@ public class shooter {
     SparkMax elevator;
     double fixedSpeed;
     int mode = 0;
-    int speed = 1;
+    double speed = .6;
     public shooter(){
         shooters= new SparkMax(2, MotorType.kBrushless);
         elevator= new SparkMax(13, MotorType.kBrushless);
