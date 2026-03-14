@@ -142,9 +142,19 @@ public class RobotContainer {
 
             //Math.clamp(m_camera.alignTag(1,.3).get(3).doubleValue(), 1.0, -1.0))
 
-            new JoystickButton(m_driverController, 2) //new LimelightAlignment(m_camera)
-            .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(1), new LimelightDrive(1,"a",1), new lineUpToCenter(1)), new InstantCommand(() -> System.out.println("false")), () -> m_camera.getDetected_ID()==1)
-            );
+             new JoystickButton(m_driverController, 2) 
+            .onTrue(new ConditionalCommand(
+              new SequentialCommandGroup(
+                new lineUpToCenter(m_camera.getDetected_ID()), new LimelightDrive(1,"a",m_camera.getDetected_ID()), new lineUpToCenter(m_camera.getDetected_ID())
+              ), 
+              new ConditionalCommand(
+                new SequentialCommandGroup(
+                  new InstantCommand(() -> m_robotDrive.drive(0,0,-m_camera.getBestYaw(),false,.3)), new LimelightDrive(.5, "z", m_camera.getDetected_ID()),new InstantCommand(()-> m_robotDrive.drive(0.0,0.0,-90.0,false,.3)), new LimelightDrive(.2, "x", m_camera.getDetected_ID())
+                ),
+                new ConditionalCommand(new InstantCommand(() -> System.out.println("false")), new InstantCommand(() -> System.out.println("false")), () -> m_camera.getDetected_ID() == 8),
+                () -> m_camera.getDetected_ID() == 13 || m_camera.getDetected_ID() ==29),
+              () -> m_camera.getDetected_ID()==10 || m_camera.getDetected_ID() ==25
+            ));
               
 
             /*new JoystickButton(m_driverController, 3)
