@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.wpi.first.math.MathUtil;
-
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.GenericHID;
 
 import edu.wpi.first.wpilibj.XboxController;
@@ -131,7 +131,7 @@ public class RobotContainer {
 
             new JoystickButton(m_driverController, 4)
             .onTrue(new ParallelCommandGroup(
-              new InstantCommand(() -> m_shooter.toggle(1)), 
+              new InstantCommand(() -> m_shooter.toggle()), 
               new InstantCommand(() -> m_belt.toggle())
             ));
 
@@ -367,6 +367,33 @@ public class lineUpToCenter extends Command{
 
 
 
+public SequentialCommandGroup shoot = new SequentialCommandGroup(
+
+new InstantCommand(() -> System.out.println("iterate")),
+
+new ParallelDeadlineGroup(
+  new WaitCommand(4), 
+  new InstantCommand(() -> m_shooter.toggle()), 
+  new InstantCommand(() -> m_belt.toggle())
+  
+  ),
+
+new ParallelDeadlineGroup(
+  new WaitCommand(4), 
+  new InstantCommand(() -> m_shooter.toggle()), 
+  new InstantCommand(() -> m_belt.toggle())
+  
+  ),
+
+new ParallelCommandGroup(
+  new InstantCommand(() -> m_shooter.toggle()), 
+  new InstantCommand(() -> m_belt.toggle())
+
+)
+
+
+);
+
 
 
 
@@ -420,7 +447,47 @@ public class lineUpToCenter extends Command{
 
   public void autonomousPeriodic(){
     
-    
+
+    switch(intmode){
+      case(1):
+
+      case(2):
+      CommandScheduler.getInstance().schedule(
+        new SequentialCommandGroup(
+          new InstantCommand(() -> System.out.println("iteration")),
+          new moveStraight(m_robotDrive, 1, -1),
+          shoot
+
+        )
+
+
+      );
+
+      case(3):
+
+      case(4):
+
+      case(5):
+
+      case(6):
+
+
+
+    }
+    /*
+     *   case(2):
+     * 
+     *   Command scheduler schedules a single sequential command
+     * 
+     *  First command move back a certain ammount
+     * 
+     *  second command shoots for however many seconds.
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
       
     
 

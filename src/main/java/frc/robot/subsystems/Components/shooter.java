@@ -8,13 +8,14 @@ public class shooter {
     SparkMax elevator;
     double fixedSpeed;
     int mode = 0;
+    int speed = 1;
     public shooter(){
         shooters= new SparkMax(2, MotorType.kBrushless);
         elevator= new SparkMax(13, MotorType.kBrushless);
         fixedSpeed=1;
     }
 
-    public void toggle(double speed){
+    public void toggle(){
         if(mode == 0){
             shooters.set(speed);
         }
