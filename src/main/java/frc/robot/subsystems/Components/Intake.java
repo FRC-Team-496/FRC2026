@@ -13,7 +13,7 @@ public class Intake {
 
     public void toggle(){
         if (mode == 0){
-            IntakeWheels.set(.6);
+            IntakeWheels.set(.8);
         }
         else{
             stop();

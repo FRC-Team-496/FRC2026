@@ -62,7 +62,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
-
+    m_camera.startCamera();
     // m_pixy.init();
 
     // Configure default commands
@@ -71,9 +71,9 @@ public class RobotContainer {
         // Turning is controlled by the X axis of the right stick.
         new RunCommand(
             () -> m_robotDrive.drive(
-                MathUtil.applyDeadband(-m_driverController.getRawAxis(1), 0.5),
-                MathUtil.applyDeadband(-m_driverController.getRawAxis(0), 0.5),
-                MathUtil.applyDeadband(-m_driverController.getRawAxis(2), 0.5),
+                MathUtil.applyDeadband(-m_driverController.getRawAxis(1), 0.2), //changed from .5 to .2, see how it drives
+                MathUtil.applyDeadband(-m_driverController.getRawAxis(0), 0.2),
+                MathUtil.applyDeadband(-m_driverController.getRawAxis(2), 0.2),
                 false, (m_driverController.getRawAxis(3)+1)/2),
             m_robotDrive)
             );
@@ -87,11 +87,11 @@ public class RobotContainer {
         //     () -> m_gyro.putGyro()    
         //     , m_gyro)
         // );
-        m_camera.setDefaultCommand(
-            new RunCommand(
-            () -> m_camera.startCamera()    
-            , m_camera)
-        );
+        // m_camera.setDefaultCommand(
+        //     new RunCommand(
+        //     () -> m_camera.startCamera()    
+        //     , m_camera)
+        // );
 
         
         }
@@ -129,11 +129,11 @@ public class RobotContainer {
             // .onTrue(new SequentialCommandGroup(new targetArea(),new RunCommand(() -> m_robotDrive.drive(m_camera.getAreaDistance(1, m_camera.getBestYaw()).get(1), m_camera.getAreaDistance(1, m_camera.getBestYaw()).get(0),0, false,.95 ))));
 
 
-            new JoystickButton(m_driverController, 6).onTrue(
-              Auto2
-            );
+            // new JoystickButton(m_driverController, 6).onTrue(
+            //   Auto2
+            // );
 
-            new JoystickButton(m_driverController, 4)
+            new JoystickButton(m_driverController2, 1)
             .onTrue(new ParallelCommandGroup(
               new InstantCommand(() -> m_shooter.toggle()), 
               new InstantCommand(() -> m_belt.toggle())
@@ -146,10 +146,10 @@ public class RobotContainer {
 
             //Math.clamp(m_camera.alignTag(1,.3).get(3).doubleValue(), 1.0, -1.0))
 
-             new JoystickButton(m_driverController, 2) 
+             new JoystickButton(m_driverController2, 2) 
             .onTrue(new ConditionalCommand(
               new SequentialCommandGroup( new InstantCommand( () -> System.out.println("true")),
-                new lineUpToCenter(10), new LimelightDrive(2.1,"a",10), new lineUpToCenter(10)
+                new lineUpToCenter(10),new InstantCommand( () -> System.out.println("true after lineup")),new LimelightDrive(2.1,"a",10), new lineUpToCenter(10)
               ), 
               new ConditionalCommand(
                 new SequentialCommandGroup(
@@ -157,7 +157,7 @@ public class RobotContainer {
                 ),
                 new ConditionalCommand(new InstantCommand(() -> System.out.println("false")), new InstantCommand(() -> System.out.println("false")), () -> m_camera.getDetected_ID() == 8),
                 () -> m_camera.getDetected_ID() == 13 || m_camera.getDetected_ID() ==29),
-              () -> m_camera.getDetected_ID()==10 || m_camera.getDetected_ID() ==9
+              () -> m_camera.getDetected_ID()==10 || m_camera.getDetected_ID() ==25
             ));
               
 
@@ -440,7 +440,9 @@ SequentialCommandGroup Auto2 = new SequentialCommandGroup(
 
 
   public void teloPeriodic(){
-       m_gyro.putGyro();
+      m_gyro.putGyro();
+      m_camera.limelightPeriodic();
+      m_camera.cameraReadouts();
   }
 
   int state = 0;

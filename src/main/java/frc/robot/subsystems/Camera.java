@@ -32,6 +32,17 @@ public class Camera extends SubsystemBase {
     private static int cameraPipelineID = 0;
     private static int neuralNetworkpipelineId;
 
+    private double[] tagToCamera;
+    
+    
+    private NetworkTable armTable;
+    NetworkTableEntry tx;
+    NetworkTableEntry ty;
+    NetworkTableEntry ta;
+    NetworkTableEntry botpose;
+    private int aprilTagID;
+
+
     //need to figure out acutal measurements for these
     private static NavX m_gyro = new NavX();
     public Camera(DriveSubsystem driveSubsystem){
@@ -39,20 +50,32 @@ public class Camera extends SubsystemBase {
     }
     
     public void startCamera() {
-        NetworkTable armTable = NetworkTableInstance.getDefault().getTable("limelight-shooter");
-        NetworkTableEntry tx = armTable.getEntry("tx");
-        NetworkTableEntry ty = armTable.getEntry("ty");
-        NetworkTableEntry ta = armTable.getEntry("ta");
-        NetworkTableEntry botpose = armTable.getEntry("botpose");
-        NetworkTableEntry pipeline = armTable.getEntry("pipeline");
-        int aprilTagID =  (int) armTable.getEntry("tid").getDouble(-1);
-        detected_ID = aprilTagID;
+        armTable = NetworkTableInstance.getDefault().getTable("limelight-shooter");
+        tx = armTable.getEntry("tx");
+        ty = armTable.getEntry("ty");
+        ta = armTable.getEntry("ta");
+        botpose = armTable.getEntry("botpose");
 
         AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
         
-        SmartDashboard.putNumber("tag ID", aprilTagID);
         //read values periodically
-        double x = tx.getDouble(0.0);
+        
+
+
+        
+
+        //getBestTargetArea(getBestYaw());
+
+    }
+
+    public void limelightPeriodic(){
+        alignTag(1,1,"a");
+
+        aprilTagID =  (int) armTable.getEntry("tid").getDouble(-1);
+        detected_ID = aprilTagID;
+
+
+        double x = tx.getDouble(0.0);  // move to periodic
         statX = x;
         double y = ty.getDouble(0.0);
         statY = y;
@@ -60,10 +83,13 @@ public class Camera extends SubsystemBase {
         double[] bot = botpose.getDoubleArray(new double[6]);
         statYaw = bot[5];
 
+        tagToCamera = armTable.getEntry("targetpose_cameraspace").getDoubleArray(new double[6]);
+
+    }
 
 
-        double[] tagToCamera = armTable.getEntry("targetpose_cameraspace").getDoubleArray(new double[6]);
 
+    public void cameraReadouts(){
         SmartDashboard.putNumber("tx Tag", tagToCamera[0]);
         SmartDashboard.putNumber("ty Tag", tagToCamera[1]);
         SmartDashboard.putNumber("tz Tag", tagToCamera[2]);
@@ -71,13 +97,12 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("yaw Tag", tagToCamera[4]);
         SmartDashboard.putNumber("roll Tag", tagToCamera[5]);
         SmartDashboard.putNumber("x crosshair",getX());
-        
         SmartDashboard.putNumber("Tag ID", aprilTagID);
-        alignTag(1,1,"a");
-
-        //getBestTargetArea(getBestYaw());
-
+        
     }
+
+
+
 
 
     public static int getDetected_ID(){
