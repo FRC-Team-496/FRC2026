@@ -31,9 +31,12 @@ import java.util.function.BooleanSupplier;
 
 import frc.robot.subsystems.Components.*;
 import java.math.*;
-import java.time.Instant;;
+import java.time.Instant;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathPlannerPath;
 
+import edu.wpi.first.wpilibj.DriverStation;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -149,7 +152,7 @@ public class RobotContainer {
              new JoystickButton(m_driverController2, 2) 
             .onTrue(new ConditionalCommand(
               new SequentialCommandGroup( new InstantCommand( () -> System.out.println("true")),
-                new lineUpToCenter(10),new InstantCommand( () -> System.out.println("true after lineup")),new LimelightDrive(2.1,"a",10), new lineUpToCenter(10)
+                new lineUpToCenter(10),new InstantCommand( () -> System.out.println("true after lineup")),new LimelightDrive(2.45,"a",10), new lineUpToCenter(10)
               ), 
               new ConditionalCommand(
                 new SequentialCommandGroup(
@@ -257,44 +260,7 @@ public class targetArea extends Command{
 
   
 
-  public class rotate extends Command{
-    DriveSubsystem m_robotDrive;
-    private double degrees; 
-    private double startRot;
-    private int direction;
-
-
-
-
-
-    public rotate(DriveSubsystem m_robotDrive, double degrees, int direction){
-      this.m_robotDrive = m_robotDrive;
-      this.degrees = degrees;
-      this.direction = direction;
-      addRequirements(m_robotDrive);
-    }
-
-
-    @Override
-    public void initialize() {
-      startRot = m_gyro.yaw();
-    }
-
-    @Override
-    public void execute() {
-      System.out.println(m_robotDrive.getHeading());
-      if (degrees !=0.0){
-        m_robotDrive.drive(0, 0.0, 1 * direction, false, .3); //-.02
-      }
-      
-    }
-
-    @Override
-    public boolean isFinished() {
-        return Math.abs(m_gyro.yaw() - startRot) > (degrees);  
-    }
-
-  }
+ 
 
 
 
@@ -340,7 +306,7 @@ public class LimelightDrive extends Command{
 
     @Override
     public boolean isFinished() {
-        return m_camera.getDetected_ID()!=tag || Math.abs(distance - m_camera.getResultantDistance(m_camera.getDistXFromTag(), m_camera.getDistZFromTag())) < .09;  
+        return  Math.abs(distance - m_camera.getResultantDistance(m_camera.getDistXFromTag(), m_camera.getDistZFromTag())) < .09;  
     }
   }
 
@@ -366,18 +332,18 @@ public class lineUpToCenter extends Command{
       SmartDashboard.putNumber("lining up", currentX);
       if (currentX>0){
         SmartDashboard.putNumber("lining up >0", currentX);
-        m_robotDrive.drive(0, 0, -1, false, .8);
+        m_robotDrive.drive(0, 0, -1, false, 1-.5*currentX);
       }
       else{
         SmartDashboard.putNumber("lining up <0", currentX);
-        m_robotDrive.drive(0,0,1,false,.8);
+        m_robotDrive.drive(0,0,1,false,1-.5*currentX); //was .8
       }
     }
   }
 
   @Override
   public boolean isFinished() {
-    return m_camera.getDetected_ID()!=tag || Math.abs(1 - currentX) < 1;  
+    return  Math.abs(1 - currentX) < .5;  
   }
 
 }
@@ -417,6 +383,23 @@ new ParallelCommandGroup(
 
 
 
+
+
+
+public Command getAutonomousCommand() {
+  try {
+    PathPlannerPath path = PathPlannerPath.fromPathFile("StraightTest");
+    return AutoBuilder.followPath(path);
+  } catch (Exception e) {
+    DriverStation.reportError("Failed to load auto path", e.getStackTrace());
+    return Commands.none();
+  }
+}
+
+
+
+
+
 SequentialCommandGroup Auto2 = new SequentialCommandGroup(
         new InstantCommand(() -> System.out.println("iteration")),
         new moveStraight(m_robotDrive, 1, -1),
@@ -443,6 +426,7 @@ SequentialCommandGroup Auto2 = new SequentialCommandGroup(
       m_gyro.putGyro();
       m_camera.limelightPeriodic();
       m_camera.cameraReadouts();
+
   }
 
   int state = 0;
