@@ -2,12 +2,14 @@ package frc.robot.subsystems;
 
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.DriveConstants;
+import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.studica.frc.*;
 import com.studica.frc.AHRS.NavXComType;
 
-
+import edu.wpi.first.math.geometry.Rotation2d;
 public class NavX extends SubsystemBase{
 
     AHRS navX;
@@ -23,13 +25,26 @@ public class NavX extends SubsystemBase{
     }
     
     public void putGyro(){
-        SmartDashboard.putNumber("Pitch", navX.getRoll());
-        SmartDashboard.putNumber("Roll", -navX.getPitch());
-        SmartDashboard.putNumber("Yaw", navX.getYaw());
+        SmartDashboard.putNumber("Raw Roll", navX.getRoll());
+        SmartDashboard.putNumber("Raw Pitch", -navX.getPitch());
+        SmartDashboard.putNumber("Raw Yaw", navX.getYaw());
         SmartDashboard.putNumber("GYRO DISTANCE", Math.abs(navX.getDisplacementX() +navX.getDisplacementY() +navX.getDisplacementZ()));
+        SmartDashboard.putNumber("Yaw Test", getHeading().getDegrees());
     }
-    public double yaw(){return navX.getYaw();}
-    public double pitch(){return navX.getRoll();}
+    public double rawYaw(){return navX.getYaw();}
+    public double rawPitch(){return navX.getPitch();}
+    public double rawRoll(){return navX.getRoll();}
 
-    
+    public Rotation2d getHeading(){
+        return new Rotation2d(navX.getYaw());
+    }
+
+    public void reset(){
+        navX.reset();
+    }
+
+
+    public double getRate(){
+        return navX.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+    }
 }

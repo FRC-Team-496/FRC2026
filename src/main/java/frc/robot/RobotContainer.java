@@ -34,6 +34,7 @@ import java.math.*;
 import java.time.Instant;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -50,7 +51,7 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   private final Camera m_camera = new Camera(m_robotDrive);
   private NavX m_gyro = new NavX();
-  private SendableChooser<Integer> m_chooser = new SendableChooser<Integer>(); 
+  private final SendableChooser<Command> autoChooser; 
   private int autoScheduler = 0;
   private final shooter m_shooter = new shooter();
   private final Belt m_belt = new Belt();
@@ -66,6 +67,13 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
     m_camera.startCamera();
+
+
+    autoChooser = AutoBuilder.buildAutoChooser();
+
+
+
+    SmartDashboard.putData("Auto Chooser", autoChooser);
     // m_pixy.init();
 
     // Configure default commands
@@ -387,13 +395,7 @@ new ParallelCommandGroup(
 
 
 public Command getAutonomousCommand() {
-  try {
-    PathPlannerPath path = PathPlannerPath.fromPathFile("StraightTest");
-    return AutoBuilder.followPath(path);
-  } catch (Exception e) {
-    DriverStation.reportError("Failed to load auto path", e.getStackTrace());
-    return Commands.none();
-  }
+ return autoChooser.getSelected(); //changes depending on what you want to run.
 }
 
 
@@ -446,12 +448,12 @@ SequentialCommandGroup Auto2 = new SequentialCommandGroup(
     intmode = (int) mode;
 
 
-
+    CommandScheduler.getInstance().schedule(getAutonomousCommand());
    
     switch(intmode){
       case(1):
       case(2):
-        CommandScheduler.getInstance().schedule(Auto2);
+        //CommandScheduler.getInstance().schedule(Auto2);
       case(3):
       case(4):
       case(5):

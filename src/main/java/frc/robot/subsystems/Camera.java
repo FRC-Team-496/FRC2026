@@ -161,7 +161,7 @@ public class Camera extends SubsystemBase {
     public static double getBestYaw(){
         //create something that checks whether the gryo yaw is calibrated and if it matches the limelight yaw
         //use both to get a more accurate value
-        double gyroYaw = m_gyro.yaw();
+        double gyroYaw = m_gyro.rawYaw();
         double limelightYaw = getYawFromTag();
         double bestYaw = limelightYaw;
         return bestYaw;
