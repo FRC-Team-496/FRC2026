@@ -159,8 +159,8 @@ public class RobotContainer {
 
              new JoystickButton(m_driverController2, 2) 
             .onTrue(new ConditionalCommand(
-              new SequentialCommandGroup( new InstantCommand( () -> System.out.println("true")),
-                new lineUpToCenter(10),new InstantCommand( () -> System.out.println("true after lineup")),new LimelightDrive(2.45,"a",10), new lineUpToCenter(10)
+              new SequentialCommandGroup( 
+                new lineUpToCenter(10),new LimelightDrive(2.45,"a",10), new lineUpToCenter(10)
               ), 
               new ConditionalCommand(
                 new SequentialCommandGroup(
@@ -337,13 +337,10 @@ public class lineUpToCenter extends Command{
   public void execute() {
     currentX = m_camera.getX();
     if (currentX !=0){
-      SmartDashboard.putNumber("lining up", currentX);
       if (currentX>0){
-        SmartDashboard.putNumber("lining up >0", currentX);
         m_robotDrive.drive(0, 0, -1, false, 1-.5*currentX);
       }
       else{
-        SmartDashboard.putNumber("lining up <0", currentX);
         m_robotDrive.drive(0,0,1,false,1-.5*currentX); //was .8
       }
     }

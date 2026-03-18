@@ -195,15 +195,7 @@ public class Camera extends SubsystemBase {
         //gyroYaw = totalYaw - gyroYaw;
         //should check differences between gyro and limelight yaw - which is closer to expected value
         //numbers are based off of a hub angle of 35 and current yaw of 40
-        SmartDashboard.putNumber("X Position: ",xPosition); //should be .5
         SmartDashboard.putNumber("Z position: " ,zPosition);//should be 1.5
-        SmartDashboard.putNumber("X Position change: ",xPositionChange);//should be .3
-        SmartDashboard.putNumber("Z position change: " ,zPositionChange);//should be .93
-        SmartDashboard.putNumber("Yaw target",yawTarget);
-        //SmartDashboard.putNumber("Gyro Yaw position change: ");//should be -15 too
-        SmartDashboard.putNumber("Distance to move: ", totalDistanceToMove);//should be .98
-        SmartDashboard.putNumber("Target Resultant Distance ", getResultantDistance(xTarget,zTarget));
-        SmartDashboard.putNumber("Current distance: ",getResultantDistance(getDistXFromTag(),getDistZFromTag()));
         if (getResultantDistance(xPosition, zPosition) > distanceFromTag){
             return totalDistanceToMove;
         }
@@ -217,12 +209,10 @@ public class Camera extends SubsystemBase {
         
 
     public boolean getBestTargetArea(double currentYaw){
-        SmartDashboard.putString("Target Area: ","running");
         double taCurrent = getTargetArea();
         double taTest=0;
         if (currentYaw>0){
             while (true){
-                SmartDashboard.putNumber("Current Area (clockwise): ",taTest);
                 driveSubsystem.drive(0, 0.0,-.1, false, .1);
                 taTest = getTargetArea();
                 if(taTest>taCurrent){
@@ -230,14 +220,12 @@ public class Camera extends SubsystemBase {
                 }
                 else{
                     driveSubsystem.drive(0, 0.0,.1, false, .1);
-                    SmartDashboard.putString("done","turning clockwise");
                     break;
                 }
             }
         }
         else if (currentYaw<0){
             while (true){
-                SmartDashboard.putNumber("Current Area (counterclockwise): ",taTest);
                 driveSubsystem.drive(0, 0.0,.1, false, .1);
                 taTest = getTargetArea();
                 if(taTest>taCurrent){
@@ -245,7 +233,6 @@ public class Camera extends SubsystemBase {
                 }
                 else{
                     driveSubsystem.drive(0, 0.0,-.1, false, .1);
-                    SmartDashboard.putString("done","turning counterclockwise");
                     break;
                 }
             }

@@ -171,17 +171,17 @@ public class DriveSubsystem extends SubsystemBase {
   //speed paramters are velocities
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, double throttle) {
     // Adjust input based on max speed
-    SmartDashboard.putNumber("xSpeed", xSpeed);
-    SmartDashboard.putNumber("ySpeed", ySpeed);
-    SmartDashboard.putNumber("rot", rot);
+    //SmartDashboard.putNumber("xSpeed", xSpeed);
+    //SmartDashboard.putNumber("ySpeed", ySpeed);
+    //SmartDashboard.putNumber("rot", rot);
     updateThrottle(1-throttle);
     xSpeed *= DriveConstants.kMaxSpeedMetersPerSecond*this.throttle;
     ySpeed *= DriveConstants.kMaxSpeedMetersPerSecond*this.throttle;
     rot *= DriveConstants.kMaxAngularSpeed*this.throttle;
 
     
-    SmartDashboard.putNumber("RobotPositionX", m_odometry.getPoseMeters().getX());
-    SmartDashboard.putNumber("RobotPositionY", m_odometry.getPoseMeters().getY());
+    //SmartDashboard.putNumber("RobotPositionX", m_odometry.getPoseMeters().getX());
+    //SmartDashboard.putNumber("RobotPositionY", m_odometry.getPoseMeters().getY());
 
 
     ChassisSpeeds speeds = 
