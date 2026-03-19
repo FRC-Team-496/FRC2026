@@ -34,6 +34,7 @@ import java.math.*;
 import java.time.Instant;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
@@ -59,6 +60,9 @@ public class RobotContainer {
   Thread m_visionThread;
   GenericHID m_driverController = new GenericHID(OIConstants.kDriverControllerPort);
   GenericHID m_driverController2 = new GenericHID(OIConstants.kDriverControllerPort2);
+  private Command redLineUp = new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(2.45,"a",10), new lineUpToCenter(10));
+  private Command blueLineUp = new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.45,"a",26), new lineUpToCenter(26));
+              
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -68,7 +72,16 @@ public class RobotContainer {
     configureButtonBindings();
     m_camera.startCamera();
 
+    NamedCommands.registerCommand("Toggle Intake", new InstantCommand(() -> m_intake.toggle()));
+    NamedCommands.registerCommand("Toggle Shooter", new ParallelCommandGroup(
+      new InstantCommand(() -> m_shooter.toggle()),
+      new InstantCommand(() -> m_belt.toggle())
 
+    ));
+    NamedCommands.registerCommand("Line up Red", new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(2.45,"a",10), new lineUpToCenter(10)));
+    NamedCommands.registerCommand("Line up Blue", new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.45,"a",26), new lineUpToCenter(26)));
+    
+    
     autoChooser = AutoBuilder.buildAutoChooser();
 
 
@@ -131,8 +144,8 @@ public class RobotContainer {
             () -> m_robotDrive.setX(),
             m_robotDrive));
           //Camera camera = new Camera();
-
-
+    
+      
             /*new JoystickButton(m_driverController, 1) 
             .onTrue(new rotate(m_robotDrive, 1, 1));*/
 
@@ -158,17 +171,11 @@ public class RobotContainer {
             //Math.clamp(m_camera.alignTag(1,.3).get(3).doubleValue(), 1.0, -1.0))
 
              new JoystickButton(m_driverController2, 2) 
-            .onTrue(new ConditionalCommand(
-              new SequentialCommandGroup( 
-                new lineUpToCenter(10),new LimelightDrive(2.45,"a",10), new lineUpToCenter(10)
-              ), 
-              new ConditionalCommand(
-                new SequentialCommandGroup(
-                  new InstantCommand(() -> m_robotDrive.drive(0,0,-m_camera.getBestYaw(),false,.3)), new LimelightDrive(.5, "z", m_camera.getDetected_ID()),new InstantCommand(()-> m_robotDrive.drive(0.0,0.0,-90.0,false,.3)), new LimelightDrive(.2, "x", m_camera.getDetected_ID())
-                ),
-                new ConditionalCommand(new InstantCommand(() -> System.out.println("false")), new InstantCommand(() -> System.out.println("false")), () -> m_camera.getDetected_ID() == 8),
-                () -> m_camera.getDetected_ID() == 13 || m_camera.getDetected_ID() ==29),
-              () -> m_camera.getDetected_ID()==10 || m_camera.getDetected_ID() ==25
+            .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(1.7,"a",10), new lineUpToCenter(10)), new ConditionalCommand(
+              new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(1.7,"a",26), new lineUpToCenter(26)), 
+                new InstantCommand(() -> System.out.println("False")),
+                () -> m_camera.getDetected_ID()==26),
+              () -> m_camera.getDetected_ID()==10 
             ));
               
 
@@ -314,7 +321,7 @@ public class LimelightDrive extends Command{
 
     @Override
     public boolean isFinished() {
-        return  Math.abs(distance - m_camera.getResultantDistance(m_camera.getDistXFromTag(), m_camera.getDistZFromTag())) < .09;  
+        return m_camera.getDetected_ID() != tag || Math.abs(distance - m_camera.getResultantDistance(m_camera.getDistXFromTag(), m_camera.getDistZFromTag())) < .09;  
     }
   }
 
@@ -338,17 +345,17 @@ public class lineUpToCenter extends Command{
     currentX = m_camera.getX();
     if (currentX !=0){
       if (currentX>0){
-        m_robotDrive.drive(0, 0, -1, false, 1-.5*currentX);
+        m_robotDrive.drive(0, 0, -1, false, .8);
       }
       else{
-        m_robotDrive.drive(0,0,1,false,1-.5*currentX); //was .8
+        m_robotDrive.drive(0,0,1,false,.8); //was .8
       }
     }
   }
 
   @Override
   public boolean isFinished() {
-    return  Math.abs(1 - currentX) < .5;  
+    return m_camera.getDetected_ID() != tag || Math.abs(1 - currentX) < 1;  
   }
 
 }
@@ -367,9 +374,8 @@ new ParallelDeadlineGroup(
   new InstantCommand(() -> m_belt.toggle())
   
   ),
-
 new ParallelDeadlineGroup(
-  new WaitCommand(4), 
+  new WaitCommand(8), 
   new InstantCommand(() -> m_shooter.toggle()), 
   new InstantCommand(() -> m_belt.toggle())
   
@@ -401,7 +407,7 @@ public Command getAutonomousCommand() {
 
 SequentialCommandGroup Auto2 = new SequentialCommandGroup(
         new InstantCommand(() -> System.out.println("iteration")),
-        new moveStraight(m_robotDrive, 1, -1),
+        new ParallelDeadlineGroup(new WaitCommand(1), new moveStraight(m_robotDrive, 1, -1)),
         shoot
 
         );
@@ -445,8 +451,8 @@ SequentialCommandGroup Auto2 = new SequentialCommandGroup(
     intmode = (int) mode;
 
 
-    CommandScheduler.getInstance().schedule(getAutonomousCommand());
-   
+    //CommandScheduler.getInstance().schedule(getAutonomousCommand());
+    CommandScheduler.getInstance().schedule(Auto2);
     switch(intmode){
       case(1):
       case(2):
