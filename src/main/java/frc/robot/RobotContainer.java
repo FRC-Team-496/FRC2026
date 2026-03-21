@@ -163,6 +163,12 @@ public class RobotContainer {
               new InstantCommand(() -> m_belt.toggle())
             ));
 
+            new JoystickButton(m_driverController2, 3)
+            .onTrue(new ParallelCommandGroup(
+              new InstantCommand(() -> m_shooter.reverse()), 
+              new InstantCommand(() -> m_belt.reverse())
+            ));
+
 
             new JoystickButton(m_driverController, 1)
             .onTrue(new InstantCommand(() -> m_intake.toggle()));
@@ -372,9 +378,15 @@ public class rotate extends Command{
   public void execute() {
     m_robotDrive.drive(0,0,-1,false,.8);
   }
-  
+
+  @Override
   public boolean isFinished(){
     return m_camera.getDetected_ID() == tag;
+  }
+
+  @Override
+  public void end(boolean interrupted){
+    m_robotDrive.drive(0,0,0,false,0); //changed override and added end to stop rotation
   }
 }
 
@@ -438,9 +450,8 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
 
         new InstantCommand(() -> m_shooter.toggle()),
         new InstantCommand(() -> m_belt.toggle()),
-        new ParallelDeadlineGroup(new WaitCommand(5.5),  new InstantCommand(() -> m_robotDrive.drive(-.7, 0, 0 ,false, .3))),
-        new rotate(10),
-        new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(2.05,"a",10), new lineUpToCenter(10)),
+        new ParallelDeadlineGroup(new WaitCommand(5.7),  new InstantCommand(() -> m_robotDrive.drive(-.7, 0, 0 ,false, .3))),
+        new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.05,"a",26), new lineUpToCenter(26)),
         new InstantCommand(() -> m_shooter.toggle()),
         new InstantCommand(() -> m_belt.toggle())   
         );
@@ -475,6 +486,8 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
 
   public void teleopInit(){
       System.out.println("Start");
+      m_belt.setSequence(0);
+      m_shooter.setSequence(0);
   }
 
   public void autoInnit(){
@@ -485,7 +498,7 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
 
 
     //CommandScheduler.getInstance().schedule(getAutonomousCommand());
-    CommandScheduler.getInstance().schedule(Auto2);
+    CommandScheduler.getInstance().schedule(AutoMiddle);
     switch(intmode){
       case(1):
       case(2):
@@ -502,7 +515,7 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
 
   public void autonomousPeriodic(){
     
-    
+    m_camera.limelightPeriodic();
     
     /*
      *   case(2):
