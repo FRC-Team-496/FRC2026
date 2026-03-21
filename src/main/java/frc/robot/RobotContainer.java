@@ -78,8 +78,8 @@ public class RobotContainer {
       new InstantCommand(() -> m_belt.toggle())
 
     ));
-    NamedCommands.registerCommand("Line up Red", new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(2.45,"a",10), new lineUpToCenter(10)));
-    NamedCommands.registerCommand("Line up Blue", new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.45,"a",26), new lineUpToCenter(26)));
+    NamedCommands.registerCommand("Line up Red", new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(1.9,"a",10), new lineUpToCenter(10)));
+    NamedCommands.registerCommand("Line up Blue", new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(1.9,"a",26), new lineUpToCenter(26)));
     
     
     autoChooser = AutoBuilder.buildAutoChooser();
@@ -171,8 +171,8 @@ public class RobotContainer {
             //Math.clamp(m_camera.alignTag(1,.3).get(3).doubleValue(), 1.0, -1.0))
 
              new JoystickButton(m_driverController2, 2) 
-            .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(1.7,"a",10), new lineUpToCenter(10)), new ConditionalCommand(
-              new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(1.7,"a",26), new lineUpToCenter(26)), 
+            .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(2.05,"a",10), new lineUpToCenter(10)), new ConditionalCommand(
+              new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.05,"a",26), new lineUpToCenter(26)), 
                 new InstantCommand(() -> System.out.println("False")),
                 () -> m_camera.getDetected_ID()==26),
               () -> m_camera.getDetected_ID()==10 
@@ -360,7 +360,23 @@ public class lineUpToCenter extends Command{
 
 }
 
+public class rotate extends Command{
+  private double tag;
+
+  public rotate(double tag){
+    this.tag = tag;
+    addRequirements(m_robotDrive);
+  }
+
+  @Override
+  public void execute() {
+    m_robotDrive.drive(0,0,-1,false,.8);
+  }
   
+  public boolean isFinished(){
+    return m_camera.getDetected_ID() == tag;
+  }
+}
 
 
 
@@ -407,9 +423,26 @@ public Command getAutonomousCommand() {
 
 SequentialCommandGroup Auto2 = new SequentialCommandGroup(
         new InstantCommand(() -> System.out.println("iteration")),
-        new ParallelDeadlineGroup(new WaitCommand(1), new moveStraight(m_robotDrive, 1, -1)),
+        new ParallelDeadlineGroup(new WaitCommand(1.2), new moveStraight(m_robotDrive, 1, -1)),
         shoot
 
+        );
+
+
+SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
+        new InstantCommand(() -> m_intake.toggle()),
+        new ParallelDeadlineGroup(new WaitCommand(1), new moveStraight(m_robotDrive, 1, -1)),
+
+        new ParallelDeadlineGroup(new WaitCommand(2), new InstantCommand(() -> m_robotDrive.drive(1, 0, 0 ,false, .3))),
+        new ParallelDeadlineGroup(new WaitCommand(3), new InstantCommand(() -> m_robotDrive.drive(.7, 0, 0 ,false, .3))),
+
+        new InstantCommand(() -> m_shooter.toggle()),
+        new InstantCommand(() -> m_belt.toggle()),
+        new ParallelDeadlineGroup(new WaitCommand(5.5),  new InstantCommand(() -> m_robotDrive.drive(-.7, 0, 0 ,false, .3))),
+        new rotate(10),
+        new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(2.05,"a",10), new lineUpToCenter(10)),
+        new InstantCommand(() -> m_shooter.toggle()),
+        new InstantCommand(() -> m_belt.toggle())   
         );
 
 

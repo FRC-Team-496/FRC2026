@@ -2,7 +2,7 @@ package frc.robot.subsystems.Components;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Intake {
     SparkMax IntakeWheels;
@@ -14,9 +14,12 @@ public class Intake {
     public void toggle(){
         if (mode == 0){
             IntakeWheels.set(.8);
+            SmartDashboard.putBoolean("Intake On", true);
+
         }
         else{
             stop();
+            SmartDashboard.putBoolean("Intake On", false);
         }
         mode = (mode + 1) % 2;
     }
