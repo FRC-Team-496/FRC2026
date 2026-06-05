@@ -452,7 +452,8 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
         new InstantCommand(() -> m_belt.toggle()),
         new ParallelDeadlineGroup(new WaitCommand(5.7),  new InstantCommand(() -> m_robotDrive.drive(-.7, 0, 0 ,false, .3))),
         new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.05,"a",26), new lineUpToCenter(26)),
-        new InstantCommand(() -> m_shooter.toggle()),
+        new InstantCommand(() -> System.out.println("aligned")),
+                new InstantCommand(() -> m_shooter.toggle()),
         new InstantCommand(() -> m_belt.toggle())   
         );
 
