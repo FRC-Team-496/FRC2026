@@ -499,7 +499,7 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
 
 
     //CommandScheduler.getInstance().schedule(getAutonomousCommand());
-    CommandScheduler.getInstance().schedule(AutoMiddle);
+    CommandScheduler.getInstance().schedule(Auto2);
     switch(intmode){
       case(1):
       case(2):
