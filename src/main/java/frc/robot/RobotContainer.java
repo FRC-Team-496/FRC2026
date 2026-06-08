@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+
 //fully importing com file odes not resolve object initialization errors; find com file and confirm it exist
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.math.MathUtil;
@@ -58,13 +59,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("Line up Red", new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(1.9,"a",10), new lineUpToCenter(10)));
     NamedCommands.registerCommand("Line up Blue", new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(1.9,"a",26), new lineUpToCenter(26)));
     
-    
     autoChooser = AutoBuilder.buildAutoChooser();
 
-
-
     SmartDashboard.putData("Auto Chooser", autoChooser);
-    // m_pixy.init();
 
     // Configure default commands
     m_robotDrive.setDefaultCommand(
@@ -80,9 +77,6 @@ public class RobotContainer {
             );
         }
         
-    
-
-
 
   /**
    * Use this method to define your button->command mappings. Buttons can be
@@ -93,54 +87,43 @@ public class RobotContainer {
    * passing it to a
    * {@link JoystickButton}.
    */
-
-  
   private void configureButtonBindings() {
-
-  
   // Driving, joystick on driver controller
     new JoystickButton(m_driverController, Button.kR1.value)
-        .whileTrue(new RunCommand(
-            () -> m_robotDrive.setX(),
-            m_robotDrive));    
+      .whileTrue(new RunCommand(
+        () -> m_robotDrive.setX(),
+          m_robotDrive));    
 
-            new JoystickButton(m_driverController2, 1)
-            .onTrue(new ParallelCommandGroup(
-              new InstantCommand(() -> m_shooter.toggle()), 
-              new InstantCommand(() -> m_belt.toggle())
-            ));
+    //makes buttons do stuff
+    new JoystickButton(m_driverController2, 1)
+      .onTrue(new ParallelCommandGroup(
+        new InstantCommand(() -> m_shooter.toggle()), 
+        new InstantCommand(() -> m_belt.toggle())
+      ));
 
-            new JoystickButton(m_driverController2, 3)
-            .onTrue(new ParallelCommandGroup(
-              new InstantCommand(() -> m_shooter.reverse()), 
-              new InstantCommand(() -> m_belt.reverse())
-            ));
+    new JoystickButton(m_driverController2, 3)
+      .onTrue(new ParallelCommandGroup(
+        new InstantCommand(() -> m_shooter.reverse()), 
+        new InstantCommand(() -> m_belt.reverse())
+      ));
 
+    new JoystickButton(m_driverController, 1)
+      .onTrue(new InstantCommand(() -> m_intake.toggle()));
 
-            new JoystickButton(m_driverController, 1)
-            .onTrue(new InstantCommand(() -> m_intake.toggle()));
-
-             new JoystickButton(m_driverController2, 2) 
-            .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(2.05,"a",10), new lineUpToCenter(10)), new ConditionalCommand(
-              new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.05,"a",26), new lineUpToCenter(26)), 
-                new InstantCommand(() -> System.out.println("False")),
-                () -> m_camera.getDetected_ID()==26),
-              () -> m_camera.getDetected_ID()==10 
-            ));
+      new JoystickButton(m_driverController2, 2) 
+        .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(2.05,"a",10), new lineUpToCenter(10)), new ConditionalCommand(
+          new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.05,"a",26), new lineUpToCenter(26)), 
+          new InstantCommand(() -> System.out.println("False")),
+          () -> m_camera.getDetected_ID()==26),
+          () -> m_camera.getDetected_ID()==10 
+        ));
   }
 
-
-
-
-
-
-
-
+//moves in a straight line for a certain distance
 public class moveStraight extends Command{
     double startX;
     DriveSubsystem m_robotDrive;
     private double distance; // in meters
-
     private int direction;
 
     public moveStraight(DriveSubsystem m_robotDrive, double distance, int direction){
@@ -157,8 +140,7 @@ public class moveStraight extends Command{
 
     @Override
     public void execute() {
-      
-      m_robotDrive.drive(.6 * direction, 0.0, 0.0, false, .3); //-.02
+      m_robotDrive.drive(.6 * direction, 0.0, 0.0, false, .3); 
     }
 
     @Override
@@ -172,8 +154,10 @@ public class moveStraight extends Command{
     }
 }
     
+//rotate until facing the tag -- needs testing, might not work
 public class targetArea extends Command{
   private boolean done;
+
   public targetArea(){
     addRequirements(m_robotDrive);
     }
@@ -189,13 +173,11 @@ public class targetArea extends Command{
   }
 }
 
-
+//drives until the robot is a certain distance away from a tag or loses the tag
 public class LimelightDrive extends Command{
-
     private double distance;
     private String orientation;
     private double tag;
-
 
     public LimelightDrive(double distance, String orientation, double tag){
         this.distance = distance;
@@ -203,7 +185,6 @@ public class LimelightDrive extends Command{
         this.tag= tag;
         addRequirements(m_robotDrive);
     }
-
 
     @Override
     public void execute() {
@@ -220,7 +201,6 @@ public class LimelightDrive extends Command{
         }
           }
       }
-    
 
     @Override
     public boolean isFinished() {
@@ -228,8 +208,8 @@ public class LimelightDrive extends Command{
     }
   }
 
+//rotates until the robot is facing the tag - works
 public class lineUpToCenter extends Command{
-
   private double currentX;
   private double tag;
 
@@ -263,10 +243,11 @@ public class lineUpToCenter extends Command{
 
 }
 
-public class rotate extends Command{
+//rotates until it sees a specific tag -- needs testing, useless?
+public class limelightRotate extends Command{
   private double tag;
 
-  public rotate(double tag){
+  public limelightRotate(double tag){
     this.tag = tag;
     addRequirements(m_robotDrive);
   }
@@ -288,7 +269,7 @@ public class rotate extends Command{
 }
 
 
-
+//shooter command sequence - delete in new season
 public SequentialCommandGroup shoot = new SequentialCommandGroup(
 
 new InstantCommand(() -> System.out.println("iterate")),
@@ -311,25 +292,14 @@ new ParallelCommandGroup(
   new InstantCommand(() -> m_belt.toggle())
 
 )
-
-
 );
-
-
-
-
-
-
-
 
 public Command getAutonomousCommand() {
  return autoChooser.getSelected(); //changes depending on what you want to run.
 }
 
 
-
-
-
+//different auto path options
 SequentialCommandGroup Auto2 = new SequentialCommandGroup(
         new InstantCommand(() -> System.out.println("iteration")),
         new ParallelDeadlineGroup(new WaitCommand(1.2), new moveStraight(m_robotDrive, 1, -1)),
@@ -364,7 +334,7 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
    */
  
 
-
+  //calls periodic methods for different subsystems, very important to keep values updated
   public void teloPeriodic(){
       m_gyro.putGyro();
       m_camera.limelightPeriodic();
@@ -377,26 +347,23 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
   int intmode;
   double startTime = System.currentTimeMillis();
   
-
+  //sets up subsystems restart at 0 position regardless of where auto ended
   public void teleopInit(){
       System.out.println("Start");
       m_belt.setSequence(0);
       m_shooter.setSequence(0);
   }
 
+  //sets up begining of auto state - ensure its the same every time
   public void autoInnit(){
     state=0;
     mode = SmartDashboard.getNumber("Autonomous Mode", 1.0);
     System.out.println(mode);
     intmode = (int) mode;
-
-
-    //CommandScheduler.getInstance().schedule(getAutonomousCommand());
-    CommandScheduler.getInstance().schedule(Auto2);
+    CommandScheduler.getInstance().schedule(Auto2); //picks which auto to use
     switch(intmode){
       case(1):
       case(2):
-        //CommandScheduler.getInstance().schedule(Auto2);
       case(3):
       case(4):
       case(5):
@@ -406,7 +373,7 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
   }
 
 
-
+  //updates values periodically in autonomous, very important to use limelight code in auto
   public void autonomousPeriodic(){
     
     m_camera.limelightPeriodic();

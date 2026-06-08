@@ -9,28 +9,20 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.proto.Kinematics;
-import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-//Imported to get IMUAxis
-import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import frc.robot.subsystems.NavX;
 
 public class DriveSubsystem extends SubsystemBase {
 
-  Double throttle = 1.0; // was 1.0, changed to 0.0
+  Double throttle = 1.0; 
 
   // Create MAXSwerveModules
   private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(
@@ -58,7 +50,6 @@ public class DriveSubsystem extends SubsystemBase {
   private RobotConfig config;
 
   private SwerveModuleState[] currSwerveModuleStates = {
-
     m_frontLeft.getState(),
     m_frontRight.getState(),
     m_rearLeft.getState(),
@@ -81,9 +72,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
-
-    //pathplanner
-
+    //pathplanner - what does this mean?????
 
     try{
       config = RobotConfig.fromGUISettings();
@@ -91,8 +80,6 @@ public class DriveSubsystem extends SubsystemBase {
       e.printStackTrace();
     }
 
-
-    
     AutoBuilder.configure(
       this::getPose, 
       this::resetPose, 
@@ -112,8 +99,6 @@ public class DriveSubsystem extends SubsystemBase {
       },
       this
     );
-
-
   }
 
   @Override
@@ -130,8 +115,6 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
 
-
-  
   /**
    * Returns the currently-estimated pose of the robot.
    *
@@ -171,18 +154,10 @@ public class DriveSubsystem extends SubsystemBase {
   //speed paramters are velocities
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, double throttle) {
     // Adjust input based on max speed
-    //SmartDashboard.putNumber("xSpeed", xSpeed);
-    //SmartDashboard.putNumber("ySpeed", ySpeed);
-    //SmartDashboard.putNumber("rot", rot);
     updateThrottle(1-throttle);
     xSpeed *= DriveConstants.kMaxSpeedMetersPerSecond*this.throttle;
     ySpeed *= DriveConstants.kMaxSpeedMetersPerSecond*this.throttle;
     rot *= DriveConstants.kMaxAngularSpeed*this.throttle;
-
-    
-    //SmartDashboard.putNumber("RobotPositionX", m_odometry.getPoseMeters().getX());
-    //SmartDashboard.putNumber("RobotPositionY", m_odometry.getPoseMeters().getY());
-
 
     ChassisSpeeds speeds = 
     fieldRelative
@@ -197,8 +172,6 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
 
-
-
 public void drive(ChassisSpeeds speeds){
   SwerveModuleState[] states = DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds);
   currSwerveModuleStates = states;
@@ -210,20 +183,6 @@ public void drive(ChassisSpeeds speeds){
     m_rearLeft.setDesiredState(currSwerveModuleStates[2]);
     m_rearRight.setDesiredState(currSwerveModuleStates[3]);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   /**
    * Sets the wheels into an X formation to prevent movement.
@@ -270,7 +229,6 @@ public void drive(ChassisSpeeds speeds){
   public double getHeading() {
     return m_gyro.getHeading().getDegrees();
   }
-
 
   public ChassisSpeeds getRobotRelativeSpeeds() {
   return DriveConstants.kDriveKinematics.toChassisSpeeds(

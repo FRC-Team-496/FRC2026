@@ -1,39 +1,22 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-//import frc.robot.LimelightHelpers;
-//import frc.robot.LimelightHelpers.RawFiducial;
-//import frc.robot.RobotContainer.moveStraight;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-//import edu.wpi.first.math.geometry.Pose2d;
-//import edu.wpi.first.math.geometry.Pose3d;
-//import edu.wpi.first.math.controller.*;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-//import edu.wpi.first.wpilibj2.command.Command;
-//import frc.robot.RobotContainer;
-//import frc.robot.RobotContainer.rotate;
-//import com.studica.frc.*;
-import frc.robot.subsystems.NavX;
-//import frc.robot.subsystems.DriveSubsystem;
-
 import java.util.ArrayList;
 
+//This class has all of the methods to get values from a limelight and some ways of non command based aligning
 public class Camera extends SubsystemBase {
     private static double statX;
     private static double statYaw;
     private static double statY;
     private static int detected_ID;
     private DriveSubsystem driveSubsystem;
-
-    private static int cameraPipelineID = 0;
-    private static int neuralNetworkpipelineId;
-
     private double[] tagToCamera;
-    
     
     private NetworkTable armTable;
     NetworkTableEntry tx;
@@ -42,53 +25,39 @@ public class Camera extends SubsystemBase {
     NetworkTableEntry botpose;
     private int aprilTagID;
 
-
-    //need to figure out acutal measurements for these
     private static NavX m_gyro = new NavX();
+
     public Camera(DriveSubsystem driveSubsystem){
         this.driveSubsystem = driveSubsystem;
     }
     
+    //gets called once when the robot turns on and the camera starts
     public void startCamera() {
+        //accesses the network table and defines initial position values
         armTable = NetworkTableInstance.getDefault().getTable("limelight-shooter");
         tx = armTable.getEntry("tx");
         ty = armTable.getEntry("ty");
         ta = armTable.getEntry("ta");
         botpose = armTable.getEntry("botpose");
-
+        
+        //only useful if we try metatag alignment or field based driving
         AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
-        
-        //read values periodically
-        
-
-
-        
-
-        //getBestTargetArea(getBestYaw());
-
     }
 
+    //reads and updates values periodically
     public void limelightPeriodic(){
-        alignTag(1,1,"a");
-
         aprilTagID =  (int) armTable.getEntry("tid").getDouble(-1);
         detected_ID = aprilTagID;
-
-
-        double x = tx.getDouble(0.0);  // move to periodic
+        double x = tx.getDouble(0.0);
         statX = x;
         double y = ty.getDouble(0.0);
         statY = y;
-        double area = ta.getDouble(0.0);
         double[] bot = botpose.getDoubleArray(new double[6]);
         statYaw = bot[5];
-
         tagToCamera = armTable.getEntry("targetpose_cameraspace").getDoubleArray(new double[6]);
-
     }
 
-
-
+    //prints out all of the positioning values for an april tag when looking from the camera
     public void cameraReadouts(){
         SmartDashboard.putNumber("tx Tag", tagToCamera[0]);
         SmartDashboard.putNumber("ty Tag", tagToCamera[1]);
@@ -98,15 +67,9 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("roll Tag", tagToCamera[5]);
         SmartDashboard.putNumber("x crosshair",getX());
         SmartDashboard.putNumber("Tag ID", aprilTagID);
-        
     }
 
-
-
-
-
-    public static int getDetected_ID(){
-        //System.out.println(detected_ID);
+    public int getDetected_ID(){
         return detected_ID;
     }
 
@@ -115,51 +78,27 @@ public class Camera extends SubsystemBase {
     }
 
     //gets degree value from crosshairs("How many degrees do we need to turn to line up?")
-    public static double getX(){
-        return statX;
-    }
-
-    public static double getYaw(){
-        return statYaw;
-    }
-
-    public static double getY(){
-        return statY;
-    }
+    public double getX(){return statX;}
+    public double getYaw(){return statYaw;}
+    public double getY(){return statY;}
 
     //gets distance value, camera is 0,0,0("How far do we need to move left/right to line up?")
-    public static double getDistX(){
-        return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[0];
-    }
-
-    public static double getDistYaw(){
-        return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[4];
-    }
-
-    public static double getDistZ(){
-        return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[2];
-    }
+    public double getDistX(){return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[0];}
+    public double getDistYaw(){return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[4];}
+    public double getDistZ(){return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[2];}
     
     //gets distance value, tag is 0,0,0("How far do we need to move left/right to line up?")
-    public static double getDistZFromTag(){
-        return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("botpose_targetspace").getDoubleArray(new double[6])[2];
-    }
+    public double getDistZFromTag(){return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("botpose_targetspace").getDoubleArray(new double[6])[2];}
+    public double getDistXFromTag(){return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("botpose_targetspace").getDoubleArray(new double [6])[0];}
 
-    public static double getDistXFromTag(){
-        return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("botpose_targetspace").getDoubleArray(new double [6])[0];
-    }
      //gets degree value
-    public static double getYawFromTag(){
-        return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("botpose_targetspace").getDoubleArray(new double [6])[4];
-    }
+    public double getYawFromTag(){return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("botpose_targetspace").getDoubleArray(new double [6])[4];}
 
-    public static double getTargetArea(){
-        return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("ta").getDouble(0);
-    }
+    //gets how much of the area of the tag can be seen by the camera (the bigger it is, the more head-on they are to eachother)
+    public double getTargetArea(){return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("ta").getDouble(0);}
 
-
-    public static double getBestYaw(){
-        //create something that checks whether the gryo yaw is calibrated and if it matches the limelight yaw
+    public double getBestYaw(){
+        //create something that checks whether the gryo yaw is calibrated and if it matches the limelight yaw -- needs to be done (worth it?)
         //use both to get a more accurate value
         double gyroYaw = m_gyro.rawYaw();
         double limelightYaw = getYawFromTag();
@@ -167,12 +106,10 @@ public class Camera extends SubsystemBase {
         return bestYaw;
     }
 
-    public double getResultantDistance(double x, double y){
-        return Math.sqrt(Math.pow(x, 2)+Math.pow(y,2));
-    }
+    //returns the distance between the camera and the tag 
+    public double getResultantDistance(double x, double y){return Math.sqrt(Math.pow(x, 2)+Math.pow(y,2));}
 
-
-    //trig function that determines how far and at what angle to robot needs to go to get to a target position
+    //trig function that determines how far and at what angle to robot needs to go to get to a target position -- not actually useful?
     public double alignTag(double tagID, double distanceFromTag, String orientation){
         double yawTarget = getBestYaw();
         double xTarget;
@@ -182,32 +119,22 @@ public class Camera extends SubsystemBase {
         //find x and z target values
         xTarget = distanceFromTag * Math.sin(yawTarget*(Math.PI/180));
         zTarget = distanceFromTag * Math.cos(yawTarget*(Math.PI/180));
-        
-
         zTarget *= -1;
 
         double xPositionChange = xTarget-xPosition;
         double zPositionChange = zTarget-zPosition;
-        //was all addition, change back if needed
 
         double totalDistanceToMove = getResultantDistance(xPositionChange, zPositionChange);
-        //double gyroYaw = m_gyro.yaw();
-        //gyroYaw = totalYaw - gyroYaw;
-        //should check differences between gyro and limelight yaw - which is closer to expected value
-        //numbers are based off of a hub angle of 35 and current yaw of 40
-        SmartDashboard.putNumber("Z position: " ,zPosition);//should be 1.5
+        SmartDashboard.putNumber("Z position: " ,zPosition);
         if (getResultantDistance(xPosition, zPosition) > distanceFromTag){
             return totalDistanceToMove;
         }
         else{
             return -totalDistanceToMove;
         }
-        
-
-
     }
         
-
+    //is suppoed to rotate until the robot is facing the tag, need to test
     public boolean getBestTargetArea(double currentYaw){
         double taCurrent = getTargetArea();
         double taTest=0;
@@ -239,19 +166,4 @@ public class Camera extends SubsystemBase {
         }
         return true;
     }
-
-    public ArrayList<Double> getAreaDistance(double distance, double yaw){
-        ArrayList<Double> returnStatement = new ArrayList<Double>();
-        double x = distance * Math.cos(yaw);
-        double z = distance *Math.sin(yaw);
-        double currentX = getDistXFromTag();
-        double currentZ = getDistZFromTag()*-1;
-        x = currentX-x;
-        z= currentZ-z;
-        returnStatement.add(x);
-        returnStatement.add(z);
-        return returnStatement;
-    }
-
-
 }
