@@ -3,21 +3,10 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
-//fully importing com file odes not resolve object initialization errors; find com file and confirm it exists
-
-//import edu.kauailabs.navx.frc.AHRS;
-//import //com.studica.frc.*;
-
+//fully importing com file odes not resolve object initialization errors; find com file and confirm it exist
 import edu.wpi.first.wpilibj2.command.*;
-
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
-
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.GenericHID;
-
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -27,18 +16,9 @@ import frc.robot.subsystems.Camera;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.NavX;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import java.util.function.BooleanSupplier;
-
 import frc.robot.subsystems.Components.*;
-import java.math.*;
-import java.time.Instant;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.path.PathPlannerPath;
-
-import edu.wpi.first.wpilibj.DriverStation;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -53,15 +33,12 @@ public class RobotContainer {
   private final Camera m_camera = new Camera(m_robotDrive);
   private NavX m_gyro = new NavX();
   private final SendableChooser<Command> autoChooser; 
-  private int autoScheduler = 0;
   private final shooter m_shooter = new shooter();
   private final Belt m_belt = new Belt();
   private final Intake m_intake = new Intake();
   Thread m_visionThread;
   GenericHID m_driverController = new GenericHID(OIConstants.kDriverControllerPort);
   GenericHID m_driverController2 = new GenericHID(OIConstants.kDriverControllerPort2);
-  private Command redLineUp = new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(2.45,"a",10), new lineUpToCenter(10));
-  private Command blueLineUp = new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.45,"a",26), new lineUpToCenter(26));
               
 
   /**
@@ -95,29 +72,12 @@ public class RobotContainer {
         // Turning is controlled by the X axis of the right stick.
         new RunCommand(
             () -> m_robotDrive.drive(
-                MathUtil.applyDeadband(-m_driverController.getRawAxis(1), 0.2), //changed from .5 to .2, see how it drives
+                MathUtil.applyDeadband(-m_driverController.getRawAxis(1), 0.2), 
                 MathUtil.applyDeadband(-m_driverController.getRawAxis(0), 0.2),
                 MathUtil.applyDeadband(-m_driverController.getRawAxis(2), 0.2),
                 false, (m_driverController.getRawAxis(3)+1)/2),
             m_robotDrive)
             );
-        
-
-      
-
-        //m_climbers.setDefaultCommand(new RunCommand(() -> m_climbers.stop(), m_climbers));        
-        // m_gyro.setDefaultCommand(
-        //     new RunCommand(
-        //     () -> m_gyro.putGyro()    
-        //     , m_gyro)
-        // );
-        // m_camera.setDefaultCommand(
-        //     new RunCommand(
-        //     () -> m_camera.startCamera()    
-        //     , m_camera)
-        // );
-
-        
         }
         
     
@@ -142,20 +102,7 @@ public class RobotContainer {
     new JoystickButton(m_driverController, Button.kR1.value)
         .whileTrue(new RunCommand(
             () -> m_robotDrive.setX(),
-            m_robotDrive));
-          //Camera camera = new Camera();
-    
-      
-            /*new JoystickButton(m_driverController, 1) 
-            .onTrue(new rotate(m_robotDrive, 1, 1));*/
-
-            // new JoystickButton(m_driverController, 1)
-            // .onTrue(new SequentialCommandGroup(new targetArea(),new RunCommand(() -> m_robotDrive.drive(m_camera.getAreaDistance(1, m_camera.getBestYaw()).get(1), m_camera.getAreaDistance(1, m_camera.getBestYaw()).get(0),0, false,.95 ))));
-
-
-            // new JoystickButton(m_driverController, 6).onTrue(
-            //   Auto2
-            // );
+            m_robotDrive));    
 
             new JoystickButton(m_driverController2, 1)
             .onTrue(new ParallelCommandGroup(
@@ -173,9 +120,6 @@ public class RobotContainer {
             new JoystickButton(m_driverController, 1)
             .onTrue(new InstantCommand(() -> m_intake.toggle()));
 
-
-            //Math.clamp(m_camera.alignTag(1,.3).get(3).doubleValue(), 1.0, -1.0))
-
              new JoystickButton(m_driverController2, 2) 
             .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(2.05,"a",10), new lineUpToCenter(10)), new ConditionalCommand(
               new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.05,"a",26), new lineUpToCenter(26)), 
@@ -183,26 +127,6 @@ public class RobotContainer {
                 () -> m_camera.getDetected_ID()==26),
               () -> m_camera.getDetected_ID()==10 
             ));
-              
-
-            /*new JoystickButton(m_driverController, 3)
-            .onTrue(new moveStraight(m_robotDrive , 1, 1));*/
-            //this works
-
-           /* new JoystickButton(m_driverController, 3)
-            .whileTrue(Commands.defer(
-              () -> Commands.select(Map.of(
-                1, new SequentialCommandGroup(new lineUpToCenter(), new LimelightDrive(1,"a",1), new lineUpToCenter()))
-                , () -> m_camera.getDetected_ID()), Set.of(m_robotDrive)
-              ));*/
-              
-
-            
-
-            
-
-            
-
   }
 
 
@@ -266,28 +190,8 @@ public class targetArea extends Command{
 }
 
 
-/*public class checkTag implements Runnable{
-  @Override
-  public void run(){
-    if(m_camera.getDetected_ID()==16){
-      new SequentialCommandGroup(new lineUpToCenter(), new LimelightDrive(1,"a",9), new lineUpToCenter());
-    }
-    else if(m_camera.getDetected_ID()==9){
-      new SequentialCommandGroup(new RunCommand(()-> m_robotDrive.drive(0,0,-m_camera.getBestYaw(),false,.5)), new LimelightDrive(.5,"z",16), new lineUpToCenter());
-    }
-  }
-}*/
-
-
-  
-
- 
-
-
-
 public class LimelightDrive extends Command{
 
-    private double pose;
     private double distance;
     private String orientation;
     private double tag;
@@ -298,15 +202,8 @@ public class LimelightDrive extends Command{
         this.orientation = orientation;
         this.tag= tag;
         addRequirements(m_robotDrive);
-
-        // if issue, change camera.... to just m_robotdrive like others
     }
 
-    @Override
-    public void initialize() {
-        
-        pose =m_camera.alignTag(m_camera.getDetected_ID(),distance,orientation);
-    }
 
     @Override
     public void execute() {
@@ -386,7 +283,7 @@ public class rotate extends Command{
 
   @Override
   public void end(boolean interrupted){
-    m_robotDrive.drive(0,0,0,false,0); //changed override and added end to stop rotation
+    m_robotDrive.drive(0,0,0,false,0); 
   }
 }
 
@@ -460,10 +357,6 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
 
 
 
-
-
-
-
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
@@ -532,13 +425,5 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
      * 
      * 
      */
-      
-    
-
-     
-
   }
   }
-
-
-
