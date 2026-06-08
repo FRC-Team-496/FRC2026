@@ -243,7 +243,7 @@ public class lineUpToCenter extends Command{
 
 }
 
-//rotates until it sees a specific tag -- needs testing, useless?
+//rotates clockwise until it sees a specific tag
 public class limelightRotate extends Command{
   private double tag;
 
