@@ -34,7 +34,7 @@ public class NavX extends SubsystemBase{
 
     //wraps the yaw in the odometry system used for most of the other methods, makes it 2d
     public Rotation2d getHeading(){
-        return new Rotation2d(Math.toRadians(navX.getYaw())); //need to convert yaw to radians according to geminai
+        return new Rotation2d(Math.toRadians(navX.getYaw())); 
     }
 
     public void reset(){

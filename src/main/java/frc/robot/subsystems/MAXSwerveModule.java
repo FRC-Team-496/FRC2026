@@ -2,9 +2,6 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-
-//There are errors everywhere, I don't know why it still works but it does
-
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -12,7 +9,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -73,7 +69,6 @@ public class MAXSwerveModule {
 
     SparkFlexConfig turningConfig = new SparkFlexConfig();
     turningConfig
-        
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(ModuleConstants.kTurningMotorCurrentLimit);
     turningConfig.absoluteEncoder
@@ -82,11 +77,9 @@ public class MAXSwerveModule {
         .velocityConversionFactor(ModuleConstants.kTurningEncoderVelocityFactor);
     turningConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-
         .positionWrappingEnabled(true)
         .positionWrappingMinInput(ModuleConstants.kTurningEncoderPositionPIDMinInput)
         .positionWrappingMaxInput(ModuleConstants.kTurningEncoderPositionPIDMaxInput)
-
         .pidf(ModuleConstants.kTurningP,
               ModuleConstants.kTurningI,
               ModuleConstants.kTurningD,
@@ -94,18 +87,11 @@ public class MAXSwerveModule {
         .outputRange(ModuleConstants.kTurningMinOutput,
                     ModuleConstants.kTurningMaxOutput);   
 
-
-        //.pid(1.0, 0, 0);
     m_turningSparkFlex.configure(turningConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-
-
     // Setup encoders and PID controllers for the driving and turning SPARKS MAX.
-
     m_drivingEncoder = m_drivingSparkFlex.getEncoder();
     m_turningEncoder = m_turningSparkFlex.getAbsoluteEncoder(); //removed "Type.kDutyCycle" from parameter
-
-
 
 
     m_drivingPIDController = m_drivingSparkFlex.getClosedLoopController();
@@ -156,7 +142,6 @@ public class MAXSwerveModule {
         new Rotation2d(m_turningEncoder.getPosition()));
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    
     m_drivingPIDController.setReference(optimizedDesiredState.speedMetersPerSecond, SparkFlex.ControlType.kVelocity);
     m_turningPIDController.setReference(optimizedDesiredState.angle.getRadians(), SparkFlex.ControlType.kPosition);
     if(drivingCANId == DriveConstants.kFrontLeftDrivingCanId){

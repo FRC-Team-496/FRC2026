@@ -117,6 +117,11 @@ public class RobotContainer {
           () -> m_camera.getDetected_ID()==26),
           () -> m_camera.getDetected_ID()==10 
         ));
+
+
+      //button tests
+      new JoystickButton(m_driverController, 5)
+      .onTrue(new targetArea());
   }
 
 //moves in a straight line for a certain distance

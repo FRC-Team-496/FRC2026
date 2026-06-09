@@ -7,7 +7,6 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import java.util.ArrayList;
 
 //This class has all of the methods to get values from a limelight and some ways of non command based aligning
 public class Camera extends SubsystemBase {

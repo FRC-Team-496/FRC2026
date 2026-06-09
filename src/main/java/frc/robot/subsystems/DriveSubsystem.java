@@ -72,7 +72,6 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
-    //pathplanner - what does this mean?????
 
     try{
       config = RobotConfig.fromGUISettings();
