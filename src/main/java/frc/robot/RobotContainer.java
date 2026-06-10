@@ -56,8 +56,8 @@ public class RobotContainer {
       new InstantCommand(() -> m_belt.toggle())
 
     ));
-    NamedCommands.registerCommand("Line up Red", new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(1.9,"a",10), new lineUpToCenter(10)));
-    NamedCommands.registerCommand("Line up Blue", new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(1.9,"a",26), new lineUpToCenter(26)));
+    NamedCommands.registerCommand("Line up Red", new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(1.9,10), new lineUpToCenter(10)));
+    NamedCommands.registerCommand("Line up Blue", new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(1.9,26), new lineUpToCenter(26)));
     
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -110,26 +110,25 @@ public class RobotContainer {
     new JoystickButton(m_driverController, 1)
       .onTrue(new InstantCommand(() -> m_intake.toggle()));
 
+      //this was the lineup sequence to shoot 
       new JoystickButton(m_driverController2, 2) 
-        .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(2.05,"a",10), new lineUpToCenter(10)), new ConditionalCommand(
-          new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.05,"a",26), new lineUpToCenter(26)), 
+        .onTrue(new ConditionalCommand(new SequentialCommandGroup(new lineUpToCenter(10),new LimelightDrive(2.05,10), new lineUpToCenter(10)), new ConditionalCommand(
+          new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.05,26), new lineUpToCenter(26)), 
           new InstantCommand(() -> System.out.println("False")),
           () -> m_camera.getDetected_ID()==26),
           () -> m_camera.getDetected_ID()==10 
         ));
 
-
-      //button tests
       new JoystickButton(m_driverController, 5)
-      .onTrue(new targetArea());
+      .onTrue(new LimelightDrive(1,5));
   }
 
 //moves in a straight line for a certain distance
 public class moveStraight extends Command{
     double startX;
     DriveSubsystem m_robotDrive;
-    private double distance; // in meters
-    private int direction;
+    private double distance; // in meters ("give or take a smidge" - ruhoy), momentum seems to take it slightly further than the measurement you give
+    private int direction; //1 is forward
 
     public moveStraight(DriveSubsystem m_robotDrive, double distance, int direction){
       this.m_robotDrive = m_robotDrive;
@@ -150,7 +149,7 @@ public class moveStraight extends Command{
 
     @Override
     public boolean isFinished() {
-        return Math.abs(m_robotDrive.getPose().getX() - startX) > (distance );  
+        return Math.abs(m_robotDrive.getPose().getX() - startX) >= (distance );  
     }
 
     @Override
@@ -158,35 +157,17 @@ public class moveStraight extends Command{
       m_robotDrive.drive(0,0,0,false,0);
     }
 }
-    
-//rotate until facing the tag -- needs testing, might not work
-public class targetArea extends Command{
-  private boolean done;
 
-  public targetArea(){
-    addRequirements(m_robotDrive);
-    }
-
-  @Override
-  public void execute() {
-      done = m_camera.getBestTargetArea(m_camera.getBestYaw());
-  }
-
-  @Override
-  public boolean isFinished() {
-      return m_camera.getDetected_ID()!=1 || done;  
-  }
-}
 
 //drives until the robot is a certain distance away from a tag or loses the tag
+//distance includes how far the camera is into the robot 
+//also overshoots a little bit, calling twice can help
 public class LimelightDrive extends Command{
     private double distance;
-    private String orientation;
     private double tag;
 
-    public LimelightDrive(double distance, String orientation, double tag){
+    public LimelightDrive(double distance, double tag){
         this.distance = distance;
-        this.orientation = orientation;
         this.tag= tag;
         addRequirements(m_robotDrive);
     }
@@ -194,15 +175,10 @@ public class LimelightDrive extends Command{
     @Override
     public void execute() {
         if (m_camera.getDetected_ID() == tag){
-          if(orientation.equals("a")){
-            if((distance-(m_camera.getResultantDistance(m_camera.getDistXFromTag(),m_camera.getDistZFromTag())))<.05){
-              m_camera.getDriveSubsystem().drive(.6,0,0,false,.5);}
-            else{
-              m_camera.getDriveSubsystem().drive(-.6,0,0,false,.5);
-            }
-        }
-          if(orientation.equals("z")){
-            m_camera.getDriveSubsystem().drive(0,.8,0,false,.5);
+          if((distance-(m_camera.getResultantDistance(m_camera.getDistXFromTag(),m_camera.getDistZFromTag())))<.05){
+            m_camera.getDriveSubsystem().drive(.6,0,0,false,.5);}
+          else{
+            m_camera.getDriveSubsystem().drive(-.6,0,0,false,.5);
         }
           }
       }
@@ -236,7 +212,7 @@ public class lineUpToCenter extends Command{
         m_robotDrive.drive(0, 0, -1, false, .8);
       }
       else{
-        m_robotDrive.drive(0,0,1,false,.8); //was .8
+        m_robotDrive.drive(0,0,1,false,.8); 
       }
     }
   }
@@ -323,7 +299,7 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
         new InstantCommand(() -> m_shooter.toggle()),
         new InstantCommand(() -> m_belt.toggle()),
         new ParallelDeadlineGroup(new WaitCommand(5.7),  new InstantCommand(() -> m_robotDrive.drive(-.7, 0, 0 ,false, .3))),
-        new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.05,"a",26), new lineUpToCenter(26)),
+        new SequentialCommandGroup(new lineUpToCenter(26),new LimelightDrive(2.05,26), new lineUpToCenter(26)),
         new InstantCommand(() -> System.out.println("aligned")),
                 new InstantCommand(() -> m_shooter.toggle()),
         new InstantCommand(() -> m_belt.toggle())   

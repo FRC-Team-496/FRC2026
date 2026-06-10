@@ -8,7 +8,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
-//This class has all of the methods to get values from a limelight and some ways of non command based aligning
+//This class has all of the methods to get values from a limelight
 public class Camera extends SubsystemBase {
     private static double statX;
     private static double statYaw;
@@ -23,8 +23,6 @@ public class Camera extends SubsystemBase {
     NetworkTableEntry ta;
     NetworkTableEntry botpose;
     private int aprilTagID;
-
-    private static NavX m_gyro = new NavX();
 
     public Camera(DriveSubsystem driveSubsystem){
         this.driveSubsystem = driveSubsystem;
@@ -96,73 +94,6 @@ public class Camera extends SubsystemBase {
     //gets how much of the area of the tag can be seen by the camera (the bigger it is, the more head-on they are to eachother)
     public double getTargetArea(){return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("ta").getDouble(0);}
 
-    public double getBestYaw(){
-        //create something that checks whether the gryo yaw is calibrated and if it matches the limelight yaw -- needs to be done (worth it?)
-        //use both to get a more accurate value
-        double gyroYaw = m_gyro.rawYaw();
-        double limelightYaw = getYawFromTag();
-        double bestYaw = limelightYaw;
-        return bestYaw;
-    }
-
     //returns the distance between the camera and the tag 
     public double getResultantDistance(double x, double y){return Math.sqrt(Math.pow(x, 2)+Math.pow(y,2));}
-
-    //trig function that determines how far and at what angle to robot needs to go to get to a target position -- not actually useful?
-    public double alignTag(double tagID, double distanceFromTag, String orientation){
-        double yawTarget = getBestYaw();
-        double xTarget;
-        double zTarget;
-        double zPosition = getDistZFromTag();
-        double xPosition = getDistXFromTag();
-        //find x and z target values
-        xTarget = distanceFromTag * Math.sin(yawTarget*(Math.PI/180));
-        zTarget = distanceFromTag * Math.cos(yawTarget*(Math.PI/180));
-        zTarget *= -1;
-
-        double xPositionChange = xTarget-xPosition;
-        double zPositionChange = zTarget-zPosition;
-
-        double totalDistanceToMove = getResultantDistance(xPositionChange, zPositionChange);
-        SmartDashboard.putNumber("Z position: " ,zPosition);
-        if (getResultantDistance(xPosition, zPosition) > distanceFromTag){
-            return totalDistanceToMove;
-        }
-        else{
-            return -totalDistanceToMove;
-        }
-    }
-        
-    //is suppoed to rotate until the robot is facing the tag, need to test
-    public boolean getBestTargetArea(double currentYaw){
-        double taCurrent = getTargetArea();
-        double taTest=0;
-        if (currentYaw>0){
-            while (true){
-                driveSubsystem.drive(0, 0.0,-.1, false, .1);
-                taTest = getTargetArea();
-                if(taTest>taCurrent){
-                    taCurrent = taTest;
-                }
-                else{
-                    driveSubsystem.drive(0, 0.0,.1, false, .1);
-                    break;
-                }
-            }
-        }
-        else if (currentYaw<0){
-            while (true){
-                driveSubsystem.drive(0, 0.0,.1, false, .1);
-                taTest = getTargetArea();
-                if(taTest>taCurrent){
-                    taCurrent = taTest;
-                }
-                else{
-                    driveSubsystem.drive(0, 0.0,-.1, false, .1);
-                    break;
-                }
-            }
-        }
-        return true;
-    }
 }
