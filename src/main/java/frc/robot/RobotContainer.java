@@ -201,12 +201,12 @@ public class lineUpToCenter extends Command{
 
   @Override
   public void initialize() {
-      currentX = m_camera.getX();
+      currentX = m_camera.getXCrosshair();
   }
 
   @Override
   public void execute() {
-    currentX = m_camera.getX();
+    currentX = m_camera.getXCrosshair();
     if (currentX !=0){
       if (currentX>0){
         m_robotDrive.drive(0, 0, -1, false, .8);

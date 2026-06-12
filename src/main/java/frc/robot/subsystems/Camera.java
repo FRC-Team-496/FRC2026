@@ -62,7 +62,7 @@ public class Camera extends SubsystemBase {
         SmartDashboard.putNumber("pitch Tag", tagToCamera[3]);
         SmartDashboard.putNumber("yaw Tag", tagToCamera[4]);
         SmartDashboard.putNumber("roll Tag", tagToCamera[5]);
-        SmartDashboard.putNumber("x crosshair",getX());
+        SmartDashboard.putNumber("x crosshair",getXCrosshair());
         SmartDashboard.putNumber("Tag ID", aprilTagID);
     }
 
@@ -75,9 +75,9 @@ public class Camera extends SubsystemBase {
     }
 
     //gets degree value from crosshairs("How many degrees do we need to turn to line up?")
-    public double getX(){return statX;}
-    public double getYaw(){return statYaw;}
-    public double getY(){return statY;}
+    public double getXCrosshair(){return statX;}
+    public double getYawCrosshair(){return statYaw;}
+    public double getYCrosshair(){return statY;}
 
     //gets distance value, camera is 0,0,0("How far do we need to move left/right to line up?")
     public double getDistX(){return NetworkTableInstance.getDefault().getTable("limelight-shooter").getEntry("targetpose_cameraspace").getDoubleArray(new double[6])[0];}
