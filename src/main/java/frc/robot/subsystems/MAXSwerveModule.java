@@ -12,14 +12,15 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
+import com.revrobotics.ResetMode;
+import com.revrobotics.PersistMode;
 
 public class MAXSwerveModule {
   private final SparkFlex m_drivingSparkFlex;
@@ -52,40 +53,54 @@ public class MAXSwerveModule {
 
    
     drivingConfig
-            .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(ModuleConstants.kDrivingMotorCurrentLimit);
-    drivingConfig.encoder
-        .positionConversionFactor(ModuleConstants.kDrivingEncoderPositionFactor)
-        .velocityConversionFactor(ModuleConstants.kDrivingEncoderVelocityFactor);
-    drivingConfig.closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pidf(ModuleConstants.kDrivingP,
-              ModuleConstants.kDrivingI,
-              ModuleConstants.kDrivingD,
-              ModuleConstants.kDrivingFF)
-        .outputRange(ModuleConstants.kDrivingMinOutput,
-                    ModuleConstants.kDrivingMaxOutput);        
-    m_drivingSparkFlex.configure(drivingConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    .idleMode(IdleMode.kBrake)
+    .smartCurrentLimit(ModuleConstants.kDrivingMotorCurrentLimit);
+
+drivingConfig.encoder
+    .positionConversionFactor(ModuleConstants.kDrivingEncoderPositionFactor)
+    .velocityConversionFactor(ModuleConstants.kDrivingEncoderVelocityFactor);
+
+drivingConfig.closedLoop
+    .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+    .pid(ModuleConstants.kDrivingP,
+         ModuleConstants.kDrivingI,
+         ModuleConstants.kDrivingD)
+    .outputRange(ModuleConstants.kDrivingMinOutput,
+                 ModuleConstants.kDrivingMaxOutput);
+
+drivingConfig.closedLoop.feedForward
+    .kV(ModuleConstants.kDrivingFF);
+
+m_drivingSparkFlex.configure(
+    drivingConfig,
+    ResetMode.kResetSafeParameters,
+    PersistMode.kPersistParameters
+);
 
     SparkFlexConfig turningConfig = new SparkFlexConfig();
-    turningConfig
-        .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(ModuleConstants.kTurningMotorCurrentLimit);
-    turningConfig.absoluteEncoder
-        .inverted(true)
-        .positionConversionFactor(ModuleConstants.kTurningEncoderPositionFactor)
-        .velocityConversionFactor(ModuleConstants.kTurningEncoderVelocityFactor);
-    turningConfig.closedLoop
-        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        .positionWrappingEnabled(true)
-        .positionWrappingMinInput(ModuleConstants.kTurningEncoderPositionPIDMinInput)
-        .positionWrappingMaxInput(ModuleConstants.kTurningEncoderPositionPIDMaxInput)
-        .pidf(ModuleConstants.kTurningP,
-              ModuleConstants.kTurningI,
-              ModuleConstants.kTurningD,
-              ModuleConstants.kTurningFF)
-        .outputRange(ModuleConstants.kTurningMinOutput,
-                    ModuleConstants.kTurningMaxOutput);   
+
+turningConfig
+    .idleMode(IdleMode.kBrake)
+    .smartCurrentLimit(ModuleConstants.kTurningMotorCurrentLimit);
+
+turningConfig.absoluteEncoder
+    .inverted(true)
+    .positionConversionFactor(ModuleConstants.kTurningEncoderPositionFactor)
+    .velocityConversionFactor(ModuleConstants.kTurningEncoderVelocityFactor);
+
+turningConfig.closedLoop
+    .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+    .positionWrappingEnabled(true)
+    .positionWrappingMinInput(ModuleConstants.kTurningEncoderPositionPIDMinInput)
+    .positionWrappingMaxInput(ModuleConstants.kTurningEncoderPositionPIDMaxInput)
+    .pid(ModuleConstants.kTurningP,
+         ModuleConstants.kTurningI,
+         ModuleConstants.kTurningD)
+    .outputRange(ModuleConstants.kTurningMinOutput,
+                 ModuleConstants.kTurningMaxOutput);
+
+turningConfig.closedLoop.feedForward
+    .kV(ModuleConstants.kTurningFF);   
 
     m_turningSparkFlex.configure(turningConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -137,13 +152,23 @@ public class MAXSwerveModule {
     correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
     correctedDesiredState.angle = desiredState.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset));
 
-    // Optimize the reference state to avoid spinning further than 90 degrees.
-    SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedDesiredState,
-        new Rotation2d(m_turningEncoder.getPosition()));
+   SwerveModuleState optimizedDesiredState = new SwerveModuleState(
+    correctedDesiredState.speedMetersPerSecond,
+    correctedDesiredState.angle
+);
 
-    // Command driving and turning SPARKS MAX towards their respective setpoints.
-    m_drivingPIDController.setReference(optimizedDesiredState.speedMetersPerSecond, SparkFlex.ControlType.kVelocity);
-    m_turningPIDController.setReference(optimizedDesiredState.angle.getRadians(), SparkFlex.ControlType.kPosition);
+optimizedDesiredState.optimize(new Rotation2d(m_turningEncoder.getPosition()));
+
+// Command driving and turning SPARKS MAX/Flex towards their respective setpoints.
+m_drivingPIDController.setSetpoint(
+    optimizedDesiredState.speedMetersPerSecond,
+    SparkBase.ControlType.kVelocity
+);
+
+m_turningPIDController.setSetpoint(
+    optimizedDesiredState.angle.getRadians(),
+    SparkBase.ControlType.kPosition
+);
     if(drivingCANId == DriveConstants.kFrontLeftDrivingCanId){
       SmartDashboard.putNumber("FL input Rot", desiredState.angle.getRadians());
       SmartDashboard.putNumber("Front Left cmd rot", optimizedDesiredState.angle.getRadians());
