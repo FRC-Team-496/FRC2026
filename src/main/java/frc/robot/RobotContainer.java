@@ -277,7 +277,6 @@ new ParallelCommandGroup(
 
 public Command getAutonomousCommand() {
  return autoChooser.getSelected(); //changes depending on what you want to run.
- ///return new PathPlannerAuto("") --for using PathPlanner
 }
 
 
