@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Components.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -342,7 +343,7 @@ SequentialCommandGroup AutoMiddle = new SequentialCommandGroup(
     mode = SmartDashboard.getNumber("Autonomous Mode", 1.0);
     System.out.println(mode);
     intmode = (int) mode;
-    CommandScheduler.getInstance().schedule(Auto2); //picks which auto to use
+    CommandScheduler.getInstance().schedule(new PathPlannerAuto("New Auto")); //picks which auto to use
     switch(intmode){
       case(1):
       case(2):
