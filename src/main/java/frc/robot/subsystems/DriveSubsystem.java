@@ -157,8 +157,8 @@ public class DriveSubsystem extends SubsystemBase {
     rot *= DriveConstants.kMaxAngularSpeed*this.throttle;
 
     ChassisSpeeds speeds = 
-    fieldRelative
-    ? ChassisSpeeds.fromFieldRelativeSpeeds(
+    fieldRelative? 
+    ChassisSpeeds.fromFieldRelativeSpeeds(
       xSpeed, 
       ySpeed,
       rot,

@@ -37,7 +37,6 @@ public class RobotContainer {
   private final shooter m_shooter = new shooter();
   private final Belt m_belt = new Belt();
   private final Intake m_intake = new Intake();
-  private boolean fieldRelativeChecker = false;
   Thread m_visionThread;
   GenericHID m_driverController = new GenericHID(OIConstants.kDriverControllerPort);
   GenericHID m_driverController2 = new GenericHID(OIConstants.kDriverControllerPort2);
@@ -63,19 +62,7 @@ public class RobotContainer {
     autoChooser = AutoBuilder.buildAutoChooser();
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
-
-    // Configure default commands
-    m_robotDrive.setDefaultCommand(
-        // The left stick controls translation of the robot.
-        // Turning is controlled by the X axis of the right stick.
-          new RunCommand(
-            () -> m_robotDrive.drive(
-                  MathUtil.applyDeadband(-m_driverController.getRawAxis(1), 0.2), 
-                  MathUtil.applyDeadband(-m_driverController.getRawAxis(0), 0.2),
-                  MathUtil.applyDeadband(-m_driverController.getRawAxis(2), 0.2),
-                  fieldRelativeChecker, (m_driverController.getRawAxis(3)+1)/2),
-              m_robotDrive));
-        }
+  }
         
 
   /**
@@ -89,6 +76,19 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
   // Driving, joystick on driver controller
+
+  // Configures driving part of joystick
+    m_robotDrive.setDefaultCommand(
+        // The left stick controls translation of the robot.
+        // Turning is controlled by the X axis of the right stick.
+          new RunCommand(
+            () -> m_robotDrive.drive(
+                  MathUtil.applyDeadband(-m_driverController.getRawAxis(1), 0.2), 
+                  MathUtil.applyDeadband(-m_driverController.getRawAxis(0), 0.2),
+                  MathUtil.applyDeadband(-m_driverController.getRawAxis(2), 0.2),
+                  m_driverController.getRawButton(2), (m_driverController.getRawAxis(3)+1)/2),
+              m_robotDrive));
+        
     new JoystickButton(m_driverController, Button.kR1.value)
       .whileTrue(new RunCommand(
         () -> m_robotDrive.setX(),
@@ -119,9 +119,9 @@ public class RobotContainer {
           () -> m_camera.getDetected_ID()==10 
         ));
       
-      //should make it so that when the button is pressed, the drive works in field relative and when it is not pressed, the drive goes back to robot relative
+      /*//should make it so that when the button is pressed, the drive works in field relative and when it is not pressed, the drive goes back to robot relative
       new JoystickButton(m_driverController, 4)
-      .whileTrue(new StartEndCommand(() -> fieldRelativeChecker = true, () -> fieldRelativeChecker = false, m_robotDrive));
+      .whileTrue(new StartEndCommand(() -> fieldRelativeChecker = true, () -> fieldRelativeChecker = false, m_robotDrive));*/
   }
 
 //moves in a straight line for a certain distance
