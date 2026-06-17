@@ -37,6 +37,7 @@ public class RobotContainer {
   private final shooter m_shooter = new shooter();
   private final Belt m_belt = new Belt();
   private final Intake m_intake = new Intake();
+  private boolean fieldRelativeChecker = false;
   Thread m_visionThread;
   GenericHID m_driverController = new GenericHID(OIConstants.kDriverControllerPort);
   GenericHID m_driverController2 = new GenericHID(OIConstants.kDriverControllerPort2);
@@ -67,14 +68,13 @@ public class RobotContainer {
     m_robotDrive.setDefaultCommand(
         // The left stick controls translation of the robot.
         // Turning is controlled by the X axis of the right stick.
-        new RunCommand(
+          new RunCommand(
             () -> m_robotDrive.drive(
-                MathUtil.applyDeadband(-m_driverController.getRawAxis(1), 0.2), 
-                MathUtil.applyDeadband(-m_driverController.getRawAxis(0), 0.2),
-                MathUtil.applyDeadband(-m_driverController.getRawAxis(2), 0.2),
-                false, (m_driverController.getRawAxis(3)+1)/2),
-            m_robotDrive)
-            );
+                  MathUtil.applyDeadband(-m_driverController.getRawAxis(1), 0.2), 
+                  MathUtil.applyDeadband(-m_driverController.getRawAxis(0), 0.2),
+                  MathUtil.applyDeadband(-m_driverController.getRawAxis(2), 0.2),
+                  fieldRelativeChecker, (m_driverController.getRawAxis(3)+1)/2),
+              m_robotDrive));
         }
         
 
@@ -118,9 +118,10 @@ public class RobotContainer {
           () -> m_camera.getDetected_ID()==26),
           () -> m_camera.getDetected_ID()==10 
         ));
-
-      new JoystickButton(m_driverController, 5)
-      .onTrue(new LimelightDrive(1,5));
+      
+      //should make it so that when the button is pressed, the drive works in field relative and when it is not pressed, the drive goes back to robot relative
+      new JoystickButton(m_driverController, 4)
+      .whileTrue(new StartEndCommand(() -> fieldRelativeChecker = true, () -> fieldRelativeChecker = false, m_robotDrive));
   }
 
 //moves in a straight line for a certain distance

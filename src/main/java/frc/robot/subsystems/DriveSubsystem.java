@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -60,8 +59,6 @@ public class DriveSubsystem extends SubsystemBase {
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
       DriveConstants.kDriveKinematics,
-      
-      
       Rotation2d.fromDegrees(m_gyro.getHeading().getDegrees()), 
       new SwerveModulePosition[] {
           m_frontLeft.getPosition(),
@@ -78,6 +75,7 @@ public class DriveSubsystem extends SubsystemBase {
     } catch (Exception e){
       e.printStackTrace();
     }
+
 
     AutoBuilder.configure(
       this::getPose, 
