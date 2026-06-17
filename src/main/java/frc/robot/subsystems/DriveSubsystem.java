@@ -128,7 +128,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void resetPose(Pose2d pose) {
     m_odometry.resetPosition(
-        m_gyro.getHeading(),
+        getRotationHeading(),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -225,6 +225,10 @@ public void drive(ChassisSpeeds speeds){
    */
   public double getHeading() {
     return m_gyro.getHeading().getDegrees();
+  }
+
+  public Rotation2d getRotationHeading(){
+    return Rotation2d.fromDegrees(getHeading());
   }
 
   public ChassisSpeeds getRobotRelativeSpeeds() {

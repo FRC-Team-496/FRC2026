@@ -22,19 +22,19 @@ public class NavX extends SubsystemBase{
     
     public void putGyro(){
         SmartDashboard.putNumber("Raw Roll", navX.getRoll());
-        SmartDashboard.putNumber("Raw Pitch", -navX.getPitch());
-        SmartDashboard.putNumber("Raw Yaw", navX.getYaw());
+        SmartDashboard.putNumber("Raw Pitch", navX.getPitch());
+        SmartDashboard.putNumber("Raw Yaw", -navX.getYaw());
         SmartDashboard.putNumber("GYRO DISTANCE", Math.abs(navX.getDisplacementX() +navX.getDisplacementY() +navX.getDisplacementZ()));
         SmartDashboard.putNumber("Yaw Test", getHeading().getDegrees());
     }
 
-    public double rawYaw(){return navX.getYaw();}
+    public double rawYaw(){return -navX.getYaw();}
     public double rawPitch(){return navX.getPitch();}
     public double rawRoll(){return navX.getRoll();}
 
     //wraps the yaw in the odometry system used for most of the other methods, makes it 2d
     public Rotation2d getHeading(){
-        return new Rotation2d(Math.toRadians(navX.getYaw())); 
+        return new Rotation2d(Math.toRadians(-navX.getYaw())); 
     }
 
     public void reset(){
